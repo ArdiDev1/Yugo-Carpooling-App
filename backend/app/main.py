@@ -1,8 +1,9 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI # type: ignore
+from app.routes import post 
+from fastapi.middleware.cors import CORSMiddleware # type: ignore
 
-app = FastAPI(title="Dartmouth Carpool API")
-
+app = FastAPI(title="backend")
+app.include_router(post.router, prefix="/api/v1")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -12,9 +13,5 @@ app.add_middleware(
 )
 
 @app.get("/")
-def read_root():
-    return {"message": "Backend is running"}
-
-@app.get("/health")
-def health_check():
-    return {"status": "ok"}
+def root():
+    return {"message": "status ok!"}
