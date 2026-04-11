@@ -1,6 +1,7 @@
 from fastapi import FastAPI # type: ignore
 
-@app.get("/")
+chat = FastAPI(title="Chat API")
+
+@chat.get("/")
 def root():
     return {"message": "Hello, World!"} 
-
