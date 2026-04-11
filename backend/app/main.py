@@ -1,9 +1,9 @@
 from fastapi import FastAPI # type: ignore
-from app.routes import post 
+from app.routes import join 
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
 
 app = FastAPI(title="backend")
-app.include_router(post.router, prefix="/api/v1")
+app.include_router(join.router, prefix="/api/v1")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],

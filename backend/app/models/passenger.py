@@ -1,10 +1,12 @@
-# type: ignore
-from pydantic import BaseModel 
+from typing import Literal
+from app.models.user import UserBase, UserCreate
 
-class Passenger(BaseModel):
-    id: str
-    name: str
-    school_email: str
-    curr_location: str
-    phone_number: str
-    gender: str
+
+class Passenger(UserBase):
+    """Full passenger record (used in responses)."""
+    role: Literal["passenger"] = "passenger"
+
+
+class PassengerCreate(UserCreate):
+    """Payload for registering as a passenger."""
+    role: Literal["passenger"] = "passenger"
