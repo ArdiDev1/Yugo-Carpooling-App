@@ -3,11 +3,9 @@ import { postService } from "../services/post.service";
 import { MOCK_POSTS } from "../mocks/posts";
 import { useFeedStore } from "../store/feed.store";
 
-const USE_MOCK = true; // flip to false once backend is ready
+const USE_MOCK = false;
 
 export function useFeed(tab = "forYou") {
-  const { user } = useFeedStore();
-
   const queryFn = tab === "forYou"
     ? () => postService.getFeed()
     : () => postService.getFollowing();

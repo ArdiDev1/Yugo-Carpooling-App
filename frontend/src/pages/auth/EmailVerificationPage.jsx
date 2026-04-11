@@ -4,6 +4,7 @@ import PageHeader from "../../components/layout/PageHeader";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import { ROUTES } from "../../constants/routes";
+import { authService } from "../../services/auth.service";
 
 export default function EmailVerificationPage() {
   const navigate       = useNavigate();
@@ -15,11 +16,8 @@ export default function EmailVerificationPage() {
     setLoading(true);
     setError(null);
     try {
-      // DEV BYPASS: accepts any code — comment out the next line and uncomment
-      // the real call below when backend email verification is ready
+      await authService.verifyEmail(code);
       navigate(ROUTES.HOME);
-      // await authService.verifyEmail(code);
-      // navigate(ROUTES.HOME);
     } catch {
       setError("Invalid code. Please try again.");
     } finally {

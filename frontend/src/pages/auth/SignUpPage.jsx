@@ -7,6 +7,8 @@ import Button from "../../components/ui/Button";
 import Toggle from "../../components/ui/Toggle";
 import { SEX_OPTIONS } from "../../constants/categories";
 import { ROUTES } from "../../constants/routes";
+import { authService } from "../../services/auth.service";
+import { useAuthStore } from "../../store/auth.store";
 
 const TOTAL_STEPS = 3;
 
@@ -15,6 +17,9 @@ export default function SignUpPage() {
   const [step, setStep]               = useState(0);
   const [role, setRole]               = useState(null);
   const [prefersWomen, setPrefersWomen] = useState(false);
+  const [error, setError]             = useState(null);
+  const [loading, setLoading]         = useState(false);
+  const setUser                       = useAuthStore((s) => s.setUser);
 
   const { register, handleSubmit, getValues, formState: { errors } } = useForm();
 
@@ -24,11 +29,20 @@ export default function SignUpPage() {
     else setStep((s) => s - 1);
   };
 
-  const onFinish = (data) => {
-    const payload = { ...data, role, prefersWomen };
-    console.log("Signup payload:", payload);
-    if (role === "driver") navigate(ROUTES.LICENSE_UPLOAD);
-    else navigate(ROUTES.EMAIL_VERIFY);
+  const onFinish = async (data) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const payload = { ...data, role, prefersWomen };
+      const res = await authService.signup(payload);
+      setUser(res.data.user, res.data.token);
+      if (role === "driver") navigate(ROUTES.LICENSE_UPLOAD);
+      else navigate(ROUTES.EMAIL_VERIFY);
+    } catch (e) {
+      setError(e.response?.data?.detail ?? "Signup failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const progress = ((step + 1) / TOTAL_STEPS) * 100;
@@ -129,7 +143,8 @@ export default function SignUpPage() {
               </p>
             )}
 
-            <Button type="submit" fullWidth>
+            {error && <p style={{ fontSize: 13, color: "#EF4444", textAlign: "center", margin: 0 }}>{error}</p>}
+            <Button type="submit" fullWidth loading={loading}>
               {role === "driver" ? "Continue to License Verification" : "Create Account"}
             </Button>
           </form>

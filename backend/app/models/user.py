@@ -1,18 +1,22 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 from typing import List, Optional
 from datetime import date, datetime
 
+_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, serialize_by_alias=True)
+
 
 class UserBase(BaseModel):
-    """Shared fields across all user types (read/response model)."""
+    model_config = _config
+
     id: str
     username: str
     name: str
-    email: str                          # school email, e.g. you@school.edu
+    email: str
     phone: str
     dob: date
     pronouns: Optional[str] = None
-    sex: str                            # "male" | "female" | "nonbinary" | "other" | "prefer_not"
+    sex: str
     prefers_women: bool = False
     school: str
     school_id: str
@@ -22,14 +26,15 @@ class UserBase(BaseModel):
     email_verified: bool = False
     rating: float = 0.0
     rating_count: int = 0
-    payment_methods: List[str] = []     # "venmo" | "zelle" | "cash" | "paypal" | "apple"
-    following: List[str] = []           # list of user IDs
-    followers: List[str] = []           # list of user IDs
+    payment_methods: List[str] = []
+    following: List[str] = []
+    followers: List[str] = []
     created_at: datetime
 
 
 class UserCreate(BaseModel):
-    """Fields a user submits at signup (no id, rating, timestamps, etc.)."""
+    model_config = _config
+
     name: str
     email: str
     password: str
@@ -38,5 +43,5 @@ class UserCreate(BaseModel):
     pronouns: Optional[str] = None
     sex: str
     prefers_women: bool = False
-    school: str
-    school_id: str
+    school: Optional[str] = None
+    school_id: Optional[str] = None

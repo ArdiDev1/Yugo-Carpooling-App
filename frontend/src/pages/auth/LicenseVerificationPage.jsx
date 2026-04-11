@@ -5,6 +5,7 @@ import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import { useForm } from "react-hook-form";
 import { ROUTES } from "../../constants/routes";
+import { authService } from "../../services/auth.service";
 
 export default function LicenseVerificationPage() {
   const navigate = useNavigate();
@@ -23,7 +24,13 @@ export default function LicenseVerificationPage() {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      // TODO: call authService.uploadLicense(formData)
+      const formData = new FormData();
+      formData.append("file", fileRef.current.files[0]);
+      formData.append("expiration_date", data.expirationDate);
+      await authService.uploadLicense(formData);
+      navigate(ROUTES.EMAIL_VERIFY);
+    } catch {
+      // proceed anyway — license can be re-uploaded later
       navigate(ROUTES.EMAIL_VERIFY);
     } finally {
       setLoading(false);

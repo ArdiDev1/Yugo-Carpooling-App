@@ -42,6 +42,7 @@ import TimePickerField from "../../components/forms/TimePickerField";
 import LuggageSelector from "../../components/forms/LuggageSelector";
 import { RIDE_PURPOSES } from "../../constants/categories";
 import { ROUTES } from "../../constants/routes";
+import { postService } from "../../services/post.service";
 
 export default function RequestFormPage() {
   const navigate = useNavigate();
@@ -72,12 +73,9 @@ export default function RequestFormPage() {
       type: "request",   // tells the backend this is a passenger request (not a driver offer)
     };
 
-    console.log("📬 New ride request payload:", payload);
-    // TODO: uncomment when backend is ready:
-    // await postService.create(payload);
-
     try {
-      navigate(ROUTES.HOME); // go back to feed after posting
+      await postService.create(payload);
+      navigate(ROUTES.HOME);
     } finally {
       setLoading(false);
     }

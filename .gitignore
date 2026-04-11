@@ -1,32 +1,47 @@
-# Python / FastAPI
+# ── Python / FastAPI ──────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+*.pycache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# virtual environments
+# ── Virtual environments ──────────────────────────────────────────────────────
 .venv/
 venv/
 env/
+ENV/
 
-# environment variables
+# ── Environment variables ─────────────────────────────────────────────────────
 .env
+.env.*
+!.env.example
 
-# Node / React (Vite)
+# ── Node / React (Vite) ────────────────────────────────────────────────────���──
 node_modules/
 dist/
+dist-ssr/
 .vite/
+*.local
 
-# logs
+# ── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
-# Docker
-*.log
+# ── Docker ────────────────────────────────────────────────────────────────────
+*.pid
 
-# OS / IDE
+# ── OS / IDE ──────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
 .vscode/
 .idea/
+*.suo
+*.sw?

@@ -1,9 +1,12 @@
 from pydantic import BaseModel, Field
 from typing import Annotated, Literal, Optional, Union
 from datetime import date, datetime
+from app.models.user import _config
 
 
 class RideBase(BaseModel):
+    model_config = _config
+
     id: str
     author_id: str
     status: Literal["open", "closed"] = "open"
@@ -38,6 +41,9 @@ Ride = Annotated[Union[RideOffer, RideRequest], Field(discriminator="type")]
 
 
 class RideOfferCreate(BaseModel):
+    model_config = _config
+
+    type: Literal["offer"] = "offer"
     content: str
     from_location: str
     to_location: str
@@ -52,6 +58,9 @@ class RideOfferCreate(BaseModel):
 
 
 class RideRequestCreate(BaseModel):
+    model_config = _config
+
+    type: Literal["request"] = "request"
     content: str
     from_location: str
     to_location: str
@@ -61,3 +70,6 @@ class RideRequestCreate(BaseModel):
     flexible: bool = True
     prefers_women: bool = False
     luggage: Literal["none", "light", "medium", "heavy"] = "none"
+
+
+PostCreate = Annotated[Union[RideOfferCreate, RideRequestCreate], Field(discriminator="type")]

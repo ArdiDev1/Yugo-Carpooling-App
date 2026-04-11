@@ -9,7 +9,7 @@ import { authService } from "../../services/auth.service";
 import { MOCK_CURRENT_USER } from "../../mocks/users";
 import { ROUTES } from "../../constants/routes";
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 export default function LoginPage() {
   const navigate   = useNavigate();

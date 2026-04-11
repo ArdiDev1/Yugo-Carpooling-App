@@ -45,6 +45,7 @@ import CapacitySelector from "../../components/forms/CapacitySelector";
 import { RIDE_PURPOSES, STORAGE_OPTIONS } from "../../constants/categories";
 import { useAuth } from "../../hooks/useAuth";
 import { ROUTES } from "../../constants/routes";
+import { postService } from "../../services/post.service";
 
 export default function OfferFormPage() {
   const navigate     = useNavigate();
@@ -82,12 +83,9 @@ export default function OfferFormPage() {
       type: "offer",              // tells backend this is a driver offer (not a passenger request)
     };
 
-    console.log("🚗 New ride offer payload:", payload);
-    // TODO: uncomment when backend is ready:
-    // await postService.create(payload);
-
     try {
-      navigate(ROUTES.HOME); // return to feed after posting
+      await postService.create(payload);
+      navigate(ROUTES.HOME);
     } finally {
       setLoading(false);
     }
