@@ -1,5 +1,5 @@
-# App name
-**App name** is your go to app for college students looking for a ride. Whether it's a quick grocery run, a party, or a flight, feel secure knowing that only fellow students can use the app. So start riding today!
+# Yugo
+**Yugo** is your go to app for college students looking for a ride. Whether it's a quick grocery run, a party, or a flight, feel secure knowing that only fellow students can use the app. So start riding today!
 
 
 ## Quick Start
@@ -20,6 +20,7 @@ Like many rideshare apps, as a passenger, we ask for a couple identifiers before
 5. Phone number
 6. Sex
 7. Pronouns
+
 You also select whether or not your registering as a passenger or driver. If you want register as both, you have to create two accounts. You will get a sent an email confirming your account and will be prompted to create your password. 
 
 If you clicked driver, you will be brought to another page after creating your password. There, you will be asked to take a picture of your driver's license. You image isn't saved, the only information that is logged is the expiration date and the fact it's a valid license.
@@ -43,12 +44,7 @@ On your profile page, you can see your own posts, and can see who and how many p
 As a driver, you'll see how many and who is interested in getting a ride from you. From there you cna click either the '✓' to accept or 'X' to reject the passenger. 
 
 ### Connecting with Rider/Driver
-Once a driver says they're interested in driving a passenger or when a driver accepts a passenger, a groupchat will be created for them to talk.
-
-
-
-for you (all posts nearyou)
-feed (repeat pass./drivers)
+Once a driver says they're interested in driving a passenger or when a driver accepts a passenger, a groupchat will be created for them to talk. Estimated price you'll have to pay to help cover gas cost are provided.
 
 ---
 ## Access
