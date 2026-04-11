@@ -1,0 +1,32 @@
+# Python / FastAPI
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# virtual environments
+.venv/
+venv/
+env/
+
+# environment variables
+.env
+
+# Node / React (Vite)
+node_modules/
+dist/
+.vite/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+*.log
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
