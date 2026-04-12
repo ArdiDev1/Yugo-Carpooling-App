@@ -9,6 +9,8 @@ import { SEX_OPTIONS } from "../../constants/categories";
 import { ROUTES } from "../../constants/routes";
 import { authService } from "../../services/auth.service";
 import { useAuthStore } from "../../store/auth.store";
+import raiseHandIcon from "../../assets/raise_hand_icon.png";
+import taxiIcon from "../../assets/taxi_icon.png";
 
 // Steps: 0 = role, 1 = basic info, 2 = personal details
 const TOTAL_STEPS = 3;
@@ -85,8 +87,8 @@ export default function SignUpPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <h2 style={{ fontSize: 20, fontWeight: 700, color: "#111827", margin: 0 }}>I am a...</h2>
             {[
-              { value: "passenger", emoji: "🙋", label: "Passenger", desc: "I need rides" },
-              { value: "driver",    emoji: "🚗", label: "Driver",    desc: "I can drive others" },
+              { value: "passenger", icon: raiseHandIcon, label: "Passenger", desc: "I need rides" },
+              { value: "driver",    icon: taxiIcon,      label: "Driver",    desc: "I can drive others" },
             ].map((opt) => (
               <button
                 key={opt.value}
@@ -104,7 +106,7 @@ export default function SignUpPage() {
                   textAlign:       "left",
                 }}
               >
-                <span style={{ fontSize: 36 }}>{opt.emoji}</span>
+                <img src={opt.icon} alt={opt.label} style={{ width: 36, height: 36, objectFit: "contain" }} />
                 <div>
                   <div style={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>{opt.label}</div>
                   <div style={{ fontSize: 13, color: "#6B7280" }}>{opt.desc}</div>

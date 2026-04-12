@@ -54,7 +54,7 @@ function EditPaymentSheet({ selected, onClose, onSave }) {
         </div>
 
         <div style={{ fontSize: 16, fontWeight: 700, color: "#111827", marginBottom: 16 }}>
-          Payment Methods
+        Payment Methods
         </div>
 
         {/* Options grid */}
