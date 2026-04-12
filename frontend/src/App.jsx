@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
 import PhoneFrame from "./components/layout/PhoneFrame";
 import BottomBar from "./components/layout/BottomBar";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
+import { useThemeStore } from "./store/theme.store";
 
 // ── Auth pages (no bottom bar, no login required) ──────────────────────────
 import LandingPage             from "./pages/auth/LandingPage";
@@ -80,6 +82,9 @@ function AppLayout({ children, overlay }) {
 }
 
 export default function App() {
+  const initTheme = useThemeStore((s) => s.init);
+  useEffect(() => { initTheme(); }, [initTheme]);
+
   return (
     <BrowserRouter>
       {/* PhoneFrame constrains the app to 390px wide, 100dvh tall */}

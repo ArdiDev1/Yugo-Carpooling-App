@@ -25,8 +25,8 @@ export default function ChatBubble({ message, isOwnMessage = false, senderName =
       <div style={{ maxWidth: "72%", display: "flex", flexDirection: "column", alignItems: isOwnMessage ? "flex-end" : "flex-start", gap: 2 }}>
         <div
           style={{
-            backgroundColor: isOwnMessage ? "#6C47FF" : "#F3F4F6",
-            color:           isOwnMessage ? "#fff" : "#111827",
+            backgroundColor: isOwnMessage ? "#07104e" : "#d1d5db",
+            color:           isOwnMessage ? "#f8f7f2" : "#111827",
             padding:         "8px 12px",
             borderRadius:    isOwnMessage ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
             fontSize:        14,

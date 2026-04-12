@@ -1,24 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #6C47FF;
-  --color-primary-light: #EDE8FF;
-  --color-primary-dark: #4f33cc;
-  --color-secondary: #FF6B6B;
-  --color-open: #22C55E;
-  --color-closed: #9CA3AF;
-  --color-surface: #FFFFFF;
-  --color-background: #F7F7F8;
-  --color-border: #E5E7EB;
-  --color-text: #111827;
-  --color-muted: #6B7280;
-  --color-danger: #EF4444;
+  --color-primary:       #7966fc;
+  --color-primary-light: #f0eeff;
+  --color-primary-dark:  #5a4ddb;
+  --color-secondary:     #fa6bae;
+  --color-open:          #22C55E;
+  --color-closed:        #9CA3AF;
+  --color-surface:       #fdfdfb;
+  --color-background:    #f5f4f9;
+  --color-border:        #ece9f0;
+  --color-text:          #1a1625;
+  --color-muted:         #8b859e;
+  --color-danger:        #EF4444;
 
   --radius-card: 12px;
   --radius-pill: 999px;
   --radius-input: 8px;
 
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
 }
 
 body {
@@ -26,4 +27,20 @@ body {
   color: var(--color-text);
   background: var(--color-background);
   -webkit-font-smoothing: antialiased;
+  font-size: 16px;
+}
+
+/* Dark mode overrides — applied via data-theme="dark" on <html> */
+[data-theme="dark"] {
+  --color-primary:       #9b8fff;
+  --color-primary-light: #1a2f82;
+  --color-primary-dark:  #7966fc;
+  --color-secondary:     #f891c3;
+  --color-surface:       #0d1b68;
+  --color-background:    #07104e;
+  --color-border:        #1b2f8a;
+  --color-text:          #f8f7f2;
+  --color-muted:         #7b85c4;
+  --color-open:          #4ade80;
+  --color-closed:        #4b5a8a;
 }
