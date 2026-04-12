@@ -5,6 +5,7 @@ import { getUserById } from "../../mocks/users";
 import RequestCard from "../../components/feed/RequestCard";
 import OfferCard from "../../components/feed/OfferCard";
 import { SkeletonFeed } from "../../components/ui/Skeleton";
+import pplIcon from "../../assets/ppl_icon.png";
 
 export default function FollowingFeedPage() {
   const user = useAuthStore((s) => s.user);
@@ -25,7 +26,7 @@ export default function FollowingFeedPage() {
         transition={{ duration: 0.4 }}
         style={{ textAlign: "center", paddingTop: 80, color: "var(--color-muted)", padding: "80px 24px 0" }}
       >
-        <div style={{ fontSize: 48, marginBottom: 16, filter: "grayscale(0.3)" }}>&#128101;</div>
+        <img src={pplIcon} alt="no posts" style={{ width: 48, height: 48, display: "block", margin: "0 auto 16px", objectFit: "contain" }} />
         <p style={{ fontSize: 16, fontWeight: 600, color: "var(--color-text)", marginBottom: 6 }}>No posts yet</p>
         <p style={{ fontSize: 13, color: "var(--color-muted)" }}>Follow other riders on their profiles!</p>
       </motion.div>

@@ -3,6 +3,7 @@ import { useAuthStore } from "../../store/auth.store";
 import { useAuth } from "../../hooks/useAuth";
 import { getPostsByUser } from "../../mocks/posts";
 import { getUserById } from "../../mocks/users";
+import { Settings } from "lucide-react";
 import ProfileHeader from "../../components/profile/ProfileHeader";
 import VehicleCard from "../../components/profile/VehicleCard";
 import PaymentMethods from "../../components/profile/PaymentMethods";
@@ -26,8 +27,8 @@ export default function MyProfilePage() {
         title="My Profile"
         showBack={false}
         rightAction={
-          <button onClick={() => navigate(ROUTES.SETTINGS)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20 }}>
-            ⚙️
+          <button onClick={() => navigate(ROUTES.SETTINGS)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", color: "var(--color-muted)" }}>
+            <Settings size={20} />
           </button>
         }
       />

@@ -5,6 +5,7 @@ import { getUserById } from "../../mocks/users";
 import { MOCK_ROOMS } from "../../mocks/messages";
 import ChatRoomPreview from "../../components/messages/ChatRoomPreview";
 import PageHeader from "../../components/layout/PageHeader";
+import messageIcon from "../../assets/message_icon.png";
 
 const USE_MOCK = true;
 
@@ -28,7 +29,7 @@ export default function MessageListPage() {
 
       {userRooms.length === 0 ? (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px", color: "#9CA3AF" }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>💬</div>
+          <img src={messageIcon} alt="messages" style={{ width: 48, height: 48, marginBottom: 12, objectFit: "contain", display: "block" }} />
           <p style={{ fontSize: 15, textAlign: "center" }}>No conversations yet.</p>
           <p style={{ fontSize: 13, textAlign: "center", marginTop: 4 }}>Match with a ride to start chatting!</p>
         </div>
