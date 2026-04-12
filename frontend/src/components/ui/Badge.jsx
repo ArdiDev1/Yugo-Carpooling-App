@@ -1,7 +1,7 @@
 const VARIANTS = {
   open:      { bg: "#DCFCE7", color: "#16A34A", label: "OPEN" },
-  closed:    { bg: "#F3F4F6", color: "#6B7280", label: "CLOSED" },
-  driver:    { bg: "#EDE8FF", color: "#6C47FF", label: "DRIVER" },
+  closed:    { bg: "var(--color-border)", color: "var(--color-muted)", label: "CLOSED" },
+  driver:    { bg: "var(--color-primary-light)", color: "var(--color-primary)", label: "DRIVER" },
   passenger: { bg: "#FFF7ED", color: "#EA580C", label: "PASSENGER" },
 };
 

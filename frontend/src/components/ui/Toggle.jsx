@@ -24,7 +24,7 @@ export default function Toggle({ checked = false, onChange, label, disabled = fa
           width:           44,
           height:          24,
           borderRadius:    999,
-          backgroundColor: checked ? "#6C47FF" : "#D1D5DB",
+          backgroundColor: checked ? "var(--color-primary)" : "var(--color-border)",
           position:        "relative",
           transition:      "background-color 0.2s",
           flexShrink:      0,
@@ -38,14 +38,14 @@ export default function Toggle({ checked = false, onChange, label, disabled = fa
             width:           20,
             height:          20,
             borderRadius:    "50%",
-            backgroundColor: "#fff",
+            backgroundColor: "var(--color-surface)",
             boxShadow:       "0 1px 3px rgba(0,0,0,0.2)",
             transition:      "left 0.2s",
           }}
         />
       </div>
       {label && (
-        <span style={{ fontSize: 14, color: "#374151" }}>{label}</span>
+        <span style={{ fontSize: 14, color: "var(--color-text)" }}>{label}</span>
       )}
     </label>
   );

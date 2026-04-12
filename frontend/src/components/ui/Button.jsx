@@ -1,14 +1,15 @@
 import Spinner from "./Spinner";
 
 const VARIANTS = {
-  primary:   { bg: "#6C47FF", color: "#fff",     border: "none" },
-  secondary: { bg: "#EDE8FF", color: "#6C47FF",  border: "none" },
-  ghost:     { bg: "transparent", color: "#6B7280", border: "1px solid #E5E7EB" },
-  danger:    { bg: "#FEE2E2", color: "#EF4444",  border: "none" },
+  primary:   { bg: "#7966fc", color: "#fff",     border: "none",                    isGradient: false },
+  gradient:  { bg: "linear-gradient(135deg, #f08a4b 0%, #e24182 100%)", color: "#fff", border: "none", isGradient: true },
+  secondary: { bg: "#f0eeff", color: "#7966fc",  border: "none",                    isGradient: false },
+  ghost:     { bg: "transparent", color: "#8b859e", border: "1px solid #ece9f0",    isGradient: false },
+  danger:    { bg: "#FEE2E2", color: "#EF4444",  border: "none",                    isGradient: false },
 };
 
 const SIZES = {
-  sm: { padding: "6px 12px", fontSize: 13 },
+  sm: { padding: "6px 12px",  fontSize: 13 },
   md: { padding: "10px 18px", fontSize: 15 },
   lg: { padding: "14px 24px", fontSize: 16 },
 };
@@ -33,18 +34,19 @@ export default function Button({
       onClick={onClick}
       disabled={disabled || loading}
       style={{
-        display:         "inline-flex",
-        alignItems:      "center",
-        justifyContent:  "center",
-        gap:             8,
-        backgroundColor: v.bg,
-        color:           v.color,
-        border:          v.border,
-        borderRadius:    8,
-        fontWeight:      600,
-        cursor:          disabled || loading ? "not-allowed" : "pointer",
-        opacity:         disabled ? 0.5 : 1,
-        width:           fullWidth ? "100%" : "auto",
+        display:          "inline-flex",
+        alignItems:       "center",
+        justifyContent:   "center",
+        gap:              8,
+        background:       v.bg,
+        color:            v.color,
+        border:           v.border,
+        borderRadius:     8,
+        fontWeight:       600,
+        cursor:           disabled || loading ? "not-allowed" : "pointer",
+        opacity:          disabled ? 0.5 : 1,
+        width:            fullWidth ? "100%" : "auto",
+        fontFamily:       "inherit",
         ...s,
         ...style,
       }}

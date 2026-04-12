@@ -9,16 +9,17 @@ export default function FeedTabs() {
       <button
         onClick={() => setActiveTab(id)}
         style={{
-          flex:            1,
-          background:      "none",
-          border:          "none",
-          cursor:          "pointer",
-          padding:         "12px 0",
-          fontSize:        14,
-          fontWeight:      active ? 700 : 500,
-          color:           active ? "#6C47FF" : "#9CA3AF",
-          borderBottom:    `2px solid ${active ? "#6C47FF" : "transparent"}`,
-          transition:      "all 0.2s",
+          flex:         1,
+          background:   "none",
+          border:       "none",
+          cursor:       "pointer",
+          padding:      "12px 0",
+          fontSize:     14,
+          fontWeight:   active ? 700 : 500,
+          color:        "#f8f7f2",
+          opacity:      active ? 1 : 0.7,
+          borderBottom: `2px solid ${active ? "#f8f7f2" : "transparent"}`,
+          transition:   "opacity 0.15s",
         }}
       >
         {label}
@@ -30,8 +31,8 @@ export default function FeedTabs() {
     <div
       style={{
         display:         "flex",
-        backgroundColor: "#fff",
-        borderBottom:    "1px solid #E5E7EB",
+        backgroundColor: "#07104e",
+        borderBottom:    "1px solid rgba(255,255,255,0.08)",
         flexShrink:      0,
       }}
     >

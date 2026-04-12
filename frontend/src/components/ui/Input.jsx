@@ -16,23 +16,23 @@ export default function Input({
       {label && (
         <label
           htmlFor={name}
-          style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}
+          style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text)" }}
         >
           {label}
         </label>
       )}
       <div
         style={{
-          display:      "flex",
-          alignItems:   "center",
-          border:       `1px solid ${error ? "#EF4444" : "#E5E7EB"}`,
-          borderRadius: 8,
-          backgroundColor: "#fff",
-          overflow:     "hidden",
+          display:         "flex",
+          alignItems:      "center",
+          border:          `1px solid ${error ? "#EF4444" : "var(--color-border)"}`,
+          borderRadius:    8,
+          backgroundColor: "var(--color-surface)",
+          overflow:        "hidden",
         }}
       >
         {prefix && (
-          <span style={{ padding: "0 10px", color: "#9CA3AF", flexShrink: 0 }}>
+          <span style={{ padding: "0 10px", color: "var(--color-muted)", flexShrink: 0 }}>
             {prefix}
           </span>
         )}
@@ -47,7 +47,7 @@ export default function Input({
             border:     "none",
             outline:    "none",
             fontSize:   15,
-            color:      "#111827",
+            color:      "var(--color-text)",
             background: "transparent",
             minWidth:   0,
           }}
@@ -55,7 +55,7 @@ export default function Input({
           {...rest}
         />
         {suffix && (
-          <span style={{ padding: "0 10px", color: "#9CA3AF", flexShrink: 0 }}>
+          <span style={{ padding: "0 10px", color: "var(--color-muted)", flexShrink: 0 }}>
             {suffix}
           </span>
         )}

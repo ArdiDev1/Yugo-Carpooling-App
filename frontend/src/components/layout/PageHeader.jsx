@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 function BackIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111827" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f8f7f2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="15 18 9 12 15 6" />
     </svg>
   );
@@ -23,8 +23,8 @@ export default function PageHeader({ title, showBack = true, onBack, rightAction
         alignItems:      "center",
         padding:         "0 16px",
         height:          52,
-        backgroundColor: "#fff",
-        borderBottom:    "1px solid #F3F4F6",
+        backgroundColor: "#07104e",
+        borderBottom:    "1px solid rgba(255,255,255,0.08)",
         flexShrink:      0,
       }}
     >
@@ -41,14 +41,14 @@ export default function PageHeader({ title, showBack = true, onBack, rightAction
 
       <span
         style={{
-          flex:       1,
-          textAlign:  "center",
-          fontSize:   17,
-          fontWeight: 700,
-          color:      "#111827",
-          overflow:   "hidden",
+          flex:         1,
+          textAlign:    "center",
+          fontSize:     17,
+          fontWeight:   700,
+          color:        "#f8f7f2",
+          overflow:     "hidden",
           textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
+          whiteSpace:   "nowrap",
         }}
       >
         {title}

@@ -1,9 +1,8 @@
 import Avatar from "../ui/Avatar";
 import Badge from "../ui/Badge";
-import PostActions from "./PostActions";
 import { LUGGAGE_OPTIONS } from "../../constants/categories";
 
-function Pill({ children, color = "#6B7280", bg = "#F3F4F6" }) {
+function Pill({ children, color = "var(--color-muted)", bg = "var(--color-border)" }) {
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 3, backgroundColor: bg, color, fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 999 }}>
       {children}
@@ -13,8 +12,8 @@ function Pill({ children, color = "#6B7280", bg = "#F3F4F6" }) {
 
 function LocationRow({ icon, text }) {
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", gap: 6, fontSize: 13, color: "#374151" }}>
-      <span style={{ color: "#9CA3AF", flexShrink: 0, marginTop: 1 }}>{icon}</span>
+    <div style={{ display: "flex", alignItems: "flex-start", gap: 6, fontSize: 13, color: "var(--color-text)" }}>
+      <span style={{ color: "var(--color-muted)", flexShrink: 0, marginTop: 1 }}>{icon}</span>
       <span style={{ lineHeight: 1.4 }}>{text}</span>
     </div>
   );
@@ -40,11 +39,11 @@ export default function RequestCard({ post, author }) {
   return (
     <div
       style={{
-        backgroundColor: "#fff",
+        backgroundColor: "var(--color-surface)",
         borderRadius:    12,
         padding:         "14px 16px",
         marginBottom:    8,
-        boxShadow:       "0 1px 3px rgba(0,0,0,0.06)",
+        boxShadow:       "0 1px 3px rgba(0,0,0,0.08)",
       }}
     >
       {/* Header */}
@@ -52,8 +51,8 @@ export default function RequestCard({ post, author }) {
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Avatar name={author.name} src={author.avatarUrl} size="sm" />
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#111827" }}>{author.username}</div>
-            <div style={{ fontSize: 11, color: "#9CA3AF" }}>{author.school}</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--color-text)" }}>{author.username}</div>
+            <div style={{ fontSize: 11, color: "var(--color-muted)" }}>{author.school}</div>
           </div>
         </div>
         <Badge variant={post.status === "open" ? "open" : "closed"} />
@@ -61,7 +60,7 @@ export default function RequestCard({ post, author }) {
 
       {/* Content */}
       {post.content && (
-        <p style={{ fontSize: 14, color: "#374151", marginBottom: 10, lineHeight: 1.5 }}>
+        <p style={{ fontSize: 14, color: "var(--color-text)", marginBottom: 10, lineHeight: 1.5 }}>
           {post.content}
         </p>
       )}
@@ -83,7 +82,6 @@ export default function RequestCard({ post, author }) {
         {luggage && <Pill>{luggage.emoji} {luggage.label}</Pill>}
       </div>
 
-      <PostActions postId={post.id} likes={post.likes} comments={post.comments} />
     </div>
   );
 }
