@@ -35,6 +35,6 @@ export const theme = {
     input: "8px",
   },
   font: {
-    sans: "'DM Sans', system-ui, sans-serif",
+    sans: "'Nunito', system-ui, sans-serif",
   },
 };

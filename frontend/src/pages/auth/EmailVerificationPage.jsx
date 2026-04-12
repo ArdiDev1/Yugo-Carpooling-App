@@ -29,7 +29,7 @@ export default function EmailVerificationPage() {
     <div style={{ height: "100dvh", display: "flex", flexDirection: "column", backgroundColor: "#F7F7F8" }}>
       <PageHeader title="Verify Email" showBack />
       <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px 24px" }}>
-        <div style={{ fontSize: 56, marginBottom: 16 }}>📧</div>
+        <div style={{ fontSize: 56, marginBottom: 16 }}>💌</div>
         <h2 style={{ fontSize: 20, fontWeight: 700, color: "#111827", textAlign: "center", margin: "0 0 8px" }}>
           Check your email
         </h2>
