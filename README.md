@@ -1,5 +1,5 @@
-# Yugo
-**Yugo** is your go to app for college students looking for a ride. Whether it's a quick grocery run, a party, or a flight, feel secure knowing that only fellow students can use the app. So start riding today!
+![Yugo logo](frontend/src/assets/Just_Yugo_transparent.png)
+ **Yugo** is your go to app for college students looking for a ride. Whether it's a quick grocery run, a party, or a flight, feel secure knowing that only fellow students can use the app. So start riding today!
 
 
 ## Quick Start
