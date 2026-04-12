@@ -2,13 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../../store/auth.store";
 import { useAuth } from "../../hooks/useAuth";
-<<<<<<< HEAD
 import { postService } from "../../services/post.service";
-=======
-import { getPostsByUser } from "../../mocks/posts";
-import { getUserById } from "../../mocks/users";
+// import { getPostsByUser } from "../../mocks/posts";
+// import { getUserById } from "../../mocks/users";
 import { Settings } from "lucide-react";
->>>>>>> cea7dabda77fd7868e3dc27d6c69a87f3d4e8c2c
 import ProfileHeader from "../../components/profile/ProfileHeader";
 import VehicleCard from "../../components/profile/VehicleCard";
 import PaymentMethods from "../../components/profile/PaymentMethods";

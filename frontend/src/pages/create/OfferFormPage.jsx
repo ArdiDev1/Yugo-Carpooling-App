@@ -90,6 +90,7 @@ export default function OfferFormPage() {
     try {
       await postService.create(payload);
       queryClient.invalidateQueries({ queryKey: ["feed"] });
+      queryClient.invalidateQueries({ queryKey: ["userPosts"] });
       showToast("Ride offer posted!");
       navigate(ROUTES.HOME);
     } finally {

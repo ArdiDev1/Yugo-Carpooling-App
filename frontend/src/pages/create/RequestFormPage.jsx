@@ -80,6 +80,7 @@ export default function RequestFormPage() {
     try {
       await postService.create(payload);
       queryClient.invalidateQueries({ queryKey: ["feed"] });
+      queryClient.invalidateQueries({ queryKey: ["userPosts"] });
       showToast("Ride request posted!");
       navigate(ROUTES.HOME);
     } finally {
