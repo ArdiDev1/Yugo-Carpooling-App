@@ -44,6 +44,10 @@ def users_collection():
     return get_db()["users"]
 
 
+def posts_collection():
+    return get_db()["posts"]
+
+
 def verification_codes_collection():
     return get_db()["verification_codes"]
 
@@ -57,6 +61,11 @@ async def _ensure_indexes() -> None:
     await users.create_index("email", unique=True)
     await users.create_index("role")
     await users.create_index("school")
+
+    posts = posts_collection()
+    await posts.create_index("author_id")
+    await posts.create_index([("status", 1), ("type", 1)])
+    await posts.create_index([("author_id", 1), ("status", 1)])
 
     codes = verification_codes_collection()
     await codes.create_index("email", unique=True)

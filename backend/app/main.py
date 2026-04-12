@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()  # must run before any app module reads os.environ at import time
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI

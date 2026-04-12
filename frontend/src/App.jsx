@@ -26,6 +26,7 @@ import SettingsPage    from "./pages/settings/SettingsPage";
 import DeleteAccountPage from "./pages/settings/DeleteAccountPage";
 
 import { ROUTES } from "./constants/routes";
+import Toast from "./components/ui/Toast";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AppLayout — the shell that wraps every logged-in screen.
@@ -89,6 +90,7 @@ export default function App() {
     <BrowserRouter>
       {/* PhoneFrame constrains the app to 390px wide, 100dvh tall */}
       <PhoneFrame>
+        <Toast />
         <Routes>
 
           {/* ── AUTH FLOW ────────────────────────────────────────────────── */}

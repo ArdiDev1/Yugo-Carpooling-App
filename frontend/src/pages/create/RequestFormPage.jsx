@@ -32,6 +32,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import PageHeader from "../../components/layout/PageHeader";
 import Button from "../../components/ui/Button";
@@ -43,9 +44,12 @@ import LuggageSelector from "../../components/forms/LuggageSelector";
 import { RIDE_PURPOSES } from "../../constants/categories";
 import { ROUTES } from "../../constants/routes";
 import { postService } from "../../services/post.service";
+import { useToastStore } from "../../store/toast.store";
 
 export default function RequestFormPage() {
-  const navigate = useNavigate();
+  const navigate     = useNavigate();
+  const queryClient  = useQueryClient();
+  const showToast    = useToastStore((s) => s.show);
 
   // ── Controlled state for fields that aren't plain text inputs ─────────────
   // These live outside react-hook-form because they use custom components
@@ -75,6 +79,8 @@ export default function RequestFormPage() {
 
     try {
       await postService.create(payload);
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+      showToast("Ride request posted!");
       navigate(ROUTES.HOME);
     } finally {
       setLoading(false);

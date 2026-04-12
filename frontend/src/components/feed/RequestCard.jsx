@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import Avatar from "../ui/Avatar";
 import Badge from "../ui/Badge";
+import PostActions from "./PostActions";
 import { LUGGAGE_OPTIONS } from "../../constants/categories";
 
 function Pill({ children, color = "var(--color-muted)", bg = "var(--color-border)" }) {
@@ -125,6 +126,13 @@ export default function RequestCard({ post, author, index = 0 }) {
         </Pill>
         {luggage && <Pill>{luggage.emoji} {luggage.label}</Pill>}
       </div>
+
+      <PostActions
+        postId={post.id}
+        likes={post.likes ?? 0}
+        comments={post.comments ?? 0}
+        isLikedByMe={post.isLikedByMe ?? false}
+      />
     </motion.div>
   );
 }

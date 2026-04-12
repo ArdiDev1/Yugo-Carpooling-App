@@ -4,6 +4,7 @@ export const postService = {
   getFeed:       (page = 0) => api.get(`/posts/feed?page=${page}`),
   getFollowing:  (page = 0) => api.get(`/posts/following?page=${page}`),
   getById:       (id)       => api.get(`/posts/${id}`),
+  getByUser:     (userId)   => api.get(`/posts/by/${userId}`),
   create:        (data)     => api.post("/posts", data),
   update:        (id, data) => api.patch(`/posts/${id}`, data),
   close:         (id)       => api.patch(`/posts/${id}`, { status: "closed" }),

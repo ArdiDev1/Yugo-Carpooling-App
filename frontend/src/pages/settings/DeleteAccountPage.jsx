@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { userService } from "../../services/user.service";
 import PageHeader from "../../components/layout/PageHeader";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
@@ -20,7 +21,7 @@ export default function DeleteAccountPage() {
     if (!confirmed) return;
     setLoading(true);
     try {
-      // TODO: await userService.deleteAccount()
+      await userService.deleteAccount();
       logout();
     } finally {
       setLoading(false);

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import Avatar from "../ui/Avatar";
 import Badge from "../ui/Badge";
+import PostActions from "./PostActions";
 
 function Pill({ children, color = "var(--color-muted)", bg = "var(--color-border)" }) {
   return (
@@ -30,13 +31,12 @@ function formatTime(timeStr) {
 function RouteIndicator({ from, to }) {
   return (
     <div style={{ display: "flex", gap: 10, alignItems: "stretch" }}>
-      {/* Dot-line-dot */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 3, paddingBottom: 3 }}>
         <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "var(--color-primary)", flexShrink: 0 }} />
         <div style={{ flex: 1, width: 2, background: "linear-gradient(to bottom, var(--color-primary), var(--color-secondary))", borderRadius: 1, margin: "3px 0" }} />
         <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "var(--color-secondary)", flexShrink: 0 }} />
       </div>
-      {/* Labels */}
+
       <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 6, minHeight: 48 }}>
         <div>
           <div style={{ fontSize: 11, color: "var(--color-muted)", fontWeight: 500, marginBottom: 1 }}>Pickup</div>
@@ -53,6 +53,7 @@ function RouteIndicator({ from, to }) {
 
 export default function OfferCard({ post, author, index = 0 }) {
   if (!post || !author) return null;
+
   const seatsLeft = (post.seatsTotal ?? 0) - (post.seatsTaken ?? 0);
   const pct = ((post.seatsTaken ?? 0) / (post.seatsTotal || 1)) * 100;
 
@@ -77,8 +78,12 @@ export default function OfferCard({ post, author, index = 0 }) {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <Avatar name={author.name} src={author.avatarUrl} size="sm" showBadge />
           <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--color-text)", letterSpacing: "-0.01em" }}>{author.username}</div>
-            <div style={{ fontSize: 11, color: "var(--color-muted)", fontWeight: 500 }}>{author.school}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--color-text)", letterSpacing: "-0.01em" }}>
+              {author.username}
+            </div>
+            <div style={{ fontSize: 11, color: "var(--color-muted)", fontWeight: 500 }}>
+              {author.school}
+            </div>
           </div>
         </div>
         <Badge variant={post.status === "open" ? "open" : "closed"} />
@@ -96,7 +101,7 @@ export default function OfferCard({ post, author, index = 0 }) {
         <RouteIndicator from={post.fromLocation} to={post.toLocation} />
       </div>
 
-      {/* Time & Date row */}
+      {/* Time & Date */}
       <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
         <div style={{
           display: "flex", alignItems: "center", gap: 5,
@@ -107,6 +112,7 @@ export default function OfferCard({ post, author, index = 0 }) {
           <span style={{ opacity: 0.6 }}>&#128338;</span>
           {post.flexible ? (post.flexibleWindow ?? "Flexible") : formatTime(post.time)}
         </div>
+
         <div style={{
           display: "flex", alignItems: "center", gap: 5,
           backgroundColor: "var(--color-background)", borderRadius: 8,
@@ -118,15 +124,18 @@ export default function OfferCard({ post, author, index = 0 }) {
         </div>
       </div>
 
-      {/* Seats indicator */}
+      {/* Seats */}
       {post.seatsTotal != null && (
         <div style={{ marginBottom: 12, backgroundColor: "var(--color-background)", borderRadius: 10, padding: "10px 12px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-            <span style={{ fontSize: 12, color: "var(--color-muted)", fontWeight: 500 }}>Seats available</span>
+            <span style={{ fontSize: 12, color: "var(--color-muted)", fontWeight: 500 }}>
+              Seats available
+            </span>
             <span style={{ fontSize: 12, fontWeight: 700, color: seatsLeft > 0 ? "#16A34A" : "#EF4444" }}>
               {seatsLeft} / {post.seatsTotal}
             </span>
           </div>
+
           <div style={{ height: 5, backgroundColor: "var(--color-border)", borderRadius: 999, overflow: "hidden" }}>
             <motion.div
               initial={{ width: 0 }}
@@ -156,6 +165,17 @@ export default function OfferCard({ post, author, index = 0 }) {
           <Pill>{post.storageCapacity === "full" ? "Full trunk" : "Half trunk"}</Pill>
         )}
       </div>
+
+      {/* ✅ FIXED: wrapped PostActions in div */}
+      <div style={{ marginTop: 12 }}>
+        <PostActions
+          postId={post.id}
+          likes={post.likes ?? 0}
+          comments={post.comments ?? 0}
+          isLikedByMe={post.isLikedByMe ?? false}
+        />
+      </div>
+
     </motion.div>
   );
 }

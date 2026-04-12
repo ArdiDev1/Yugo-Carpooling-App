@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { useFeed } from "../../hooks/useFeed";
-import { getUserById } from "../../mocks/users";
 import RequestCard from "../../components/feed/RequestCard";
 import OfferCard from "../../components/feed/OfferCard";
 import { SkeletonFeed } from "../../components/ui/Skeleton";
@@ -28,13 +27,12 @@ export default function ForYouPage() {
   }
 
   return (
-    <div style={{ padding: "10px 14px" }}>
-      {posts.map((post, i) => {
-        const author = getUserById(post.authorId);
-        return post.type === "request"
-          ? <RequestCard key={post.id} post={post} author={author} index={i} />
-          : <OfferCard   key={post.id} post={post} author={author} index={i} />;
-      })}
+    <div style={{ padding: "8px 12px" }}>
+      {posts.map((post) =>
+        post.type === "request"
+          ? <RequestCard key={post.id} post={post} author={post.author} />
+          : <OfferCard   key={post.id} post={post} author={post.author} />
+      )}
     </div>
   );
 }

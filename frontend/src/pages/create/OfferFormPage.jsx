@@ -34,6 +34,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import PageHeader from "../../components/layout/PageHeader";
 import Button from "../../components/ui/Button";
@@ -46,10 +47,13 @@ import { RIDE_PURPOSES, STORAGE_OPTIONS } from "../../constants/categories";
 import { useAuth } from "../../hooks/useAuth";
 import { ROUTES } from "../../constants/routes";
 import { postService } from "../../services/post.service";
+import { useToastStore } from "../../store/toast.store";
 
 export default function OfferFormPage() {
   const navigate     = useNavigate();
+  const queryClient  = useQueryClient();
   const { isDriver } = useAuth(); // reads role from the auth Zustand store
+  const showToast    = useToastStore((s) => s.show);
 
   // ── Role gate — redirect passengers immediately ────────────────────────────
   // This runs once on mount. If the user isn't a driver (e.g., they typed
@@ -85,6 +89,8 @@ export default function OfferFormPage() {
 
     try {
       await postService.create(payload);
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+      showToast("Ride offer posted!");
       navigate(ROUTES.HOME);
     } finally {
       setLoading(false);

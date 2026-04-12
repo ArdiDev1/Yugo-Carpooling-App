@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../../store/auth.store";
 import { useAuth } from "../../hooks/useAuth";
-import { getPostsByUser } from "../../mocks/posts";
-import { getUserById } from "../../mocks/users";
+import { postService } from "../../services/post.service";
 import ProfileHeader from "../../components/profile/ProfileHeader";
 import VehicleCard from "../../components/profile/VehicleCard";
 import PaymentMethods from "../../components/profile/PaymentMethods";
@@ -12,13 +12,17 @@ import PageHeader from "../../components/layout/PageHeader";
 import { ROUTES } from "../../constants/routes";
 
 export default function MyProfilePage() {
-  const navigate    = useNavigate();
-  const user        = useAuthStore((s) => s.user);
+  const navigate             = useNavigate();
+  const user                 = useAuthStore((s) => s.user);
   const { isDriver, logout } = useAuth();
 
-  if (!user) return null;
+  const { data: myPosts = [] } = useQuery({
+    queryKey: ["userPosts", user?.id],
+    queryFn:  () => postService.getByUser(user.id).then((r) => r.data),
+    enabled:  !!user?.id,
+  });
 
-  const myPosts = getPostsByUser(user.id);
+  if (!user) return null;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "#F7F7F8" }}>
@@ -44,7 +48,6 @@ export default function MyProfilePage() {
 
         <PaymentMethods methods={user.paymentMethods ?? []} isOwnProfile />
 
-        {/* Posts */}
         {myPosts.length > 0 && (
           <div style={{ padding: "12px 12px 0" }}>
             <h3 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: "0 0 8px 4px" }}>My Posts</h3>

@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "../../store/auth.store";
 import { useAuth } from "../../hooks/useAuth";
+import { userService } from "../../services/user.service";
+import { useToastStore } from "../../store/toast.store";
 import PageHeader from "../../components/layout/PageHeader";
 import Input from "../../components/ui/Input";
 import Toggle from "../../components/ui/Toggle";
@@ -13,6 +16,8 @@ export default function EditProfilePage() {
   const navigate        = useNavigate();
   const user            = useAuthStore((s) => s.user);
   const { isDriver, updateUser } = useAuth();
+  const queryClient              = useQueryClient();
+  const showToast                = useToastStore((s) => s.show);
   const [prefersWomen, setPrefersWomen] = useState(user?.prefersWomen ?? false);
   const [loading, setLoading]           = useState(false);
 
@@ -45,15 +50,17 @@ export default function EditProfilePage() {
         vehicle: {
           make:  data.vehicleMake,
           model: data.vehicleModel,
-          year:  data.vehicleYear,
+          year:  Number(data.vehicleYear) || data.vehicleYear,
           color: data.vehicleColor,
           plate: data.vehiclePlate,
         },
       } : {}),
     };
     try {
-      // TODO: await userService.updateProfile(patch)
-      updateUser(patch);
+      const { data: updatedUser } = await userService.updateProfile(patch);
+      updateUser(updatedUser);
+      queryClient.invalidateQueries({ queryKey: ["user", updatedUser.id] });
+      showToast("Profile saved!");
       navigate(ROUTES.MY_PROFILE);
     } finally {
       setLoading(false);

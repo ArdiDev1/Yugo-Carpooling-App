@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { postService } from "../../services/post.service";
 
 function HeartIcon({ filled }) {
   return (
@@ -16,13 +17,25 @@ function CommentIcon() {
   );
 }
 
-export default function PostActions({ postId, likes = 0, comments = 0, onComment }) {
-  const [liked, setLiked]     = useState(false);
+export default function PostActions({ postId, likes = 0, comments = 0, isLikedByMe = false, onComment }) {
+  const [liked, setLiked]     = useState(isLikedByMe);
   const [likeCount, setCount] = useState(likes);
 
-  const handleLike = () => {
-    setLiked((v) => !v);
-    setCount((c) => (liked ? c - 1 : c + 1));
+  const handleLike = async () => {
+    const newLiked = !liked;
+    setLiked(newLiked);
+    setCount((c) => newLiked ? c + 1 : c - 1);
+    try {
+      if (newLiked) {
+        await postService.like(postId);
+      } else {
+        await postService.unlike(postId);
+      }
+    } catch {
+      // Revert optimistic update on error
+      setLiked(!newLiked);
+      setCount((c) => newLiked ? c - 1 : c + 1);
+    }
   };
 
   return (
