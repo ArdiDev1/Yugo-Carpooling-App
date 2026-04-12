@@ -21,7 +21,38 @@ class IdCheckResult(TypedDict):
     score: Optional[float]
 
 
+TEST_MODE = os.environ.get("ID_CHECK_TEST_MODE", "true").lower() == "true"
+
+ALLOWED_SIGNATURES = {
+    b"\xff\xd8\xff": "jpeg",       # JPEG / JPG
+    b"\x89PNG":      "png",        # PNG
+}
+
+
+def _detect_image_format(image_bytes: bytes) -> Optional[str]:
+    for sig, fmt in ALLOWED_SIGNATURES.items():
+        if image_bytes[:len(sig)] == sig:
+            return fmt
+    return None
+
+
 def verify_id(image_bytes: bytes) -> IdCheckResult:
+    fmt = _detect_image_format(image_bytes)
+    if fmt is None:
+        return _empty_result()
+
+    # --- TEST MODE: skip the real API, always approve ---
+    if TEST_MODE:
+        return {
+            "is_valid": True,
+            "name": "Test User",
+            "dob": "2000-01-01",
+            "document_number": "TEST-0000000",
+            "expiry": "2030-01-01",
+            "score": 1.0,
+        }
+
+    # --- PRODUCTION: call ID Analyzer API ---
     encoded = base64.b64encode(image_bytes).decode("utf-8")
 
     payload = {
