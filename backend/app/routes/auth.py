@@ -1,28 +1,18 @@
-import random
-import uuid
-from datetime import datetime, date, timedelta, timezone
-from typing import Annotated, Union
+from datetime import date, datetime, timezone
+from typing import Union
 
 import bcrypt
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from pydantic import BaseModel, Field
 
 from app.auth.deps import get_current_user
-from app.db.mongo import (
-    users_collection,
-    verification_codes_collection,
-)
-from app.models.driver import Driver, DriverCreate
-from app.models.passenger import Passenger, PassengerCreate
+from app.db.mongo import users_collection
+from app.models.driver import Driver
+from app.models.passenger import Passenger
 from app.models.user import _config
-from app.services.email import send_verification_code
 from app.services.IdCheck import verify_id
+from pydantic import BaseModel
 
 router = APIRouter()
-
-SignupBody = Annotated[Union[PassengerCreate, DriverCreate], Field(discriminator="role")]
-
-CODE_TTL_MINUTES = 10
 
 
 class LoginRequest(BaseModel):
@@ -31,17 +21,8 @@ class LoginRequest(BaseModel):
     password: str
 
 
-class VerifyEmailRequest(BaseModel):
-    model_config = _config
-    code: str
-
-
 def _now() -> datetime:
     return datetime.now(timezone.utc)
-
-
-def _hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
 def _verify_password(password: str, password_hash: str) -> bool:
@@ -63,82 +44,6 @@ def _doc_to_user(doc: dict) -> Union[Passenger, Driver]:
             data["license_expiration"] = date.fromisoformat(exp)
         return Driver(**data)
     return Passenger(**data)
-
-
-@router.post(
-    "/signup",
-    summary="Register a new user",
-    description="Creates a passenger or driver account and emails a 4-digit verification code.",
-    status_code=201,
-    responses={409: {"description": "Email already registered"}},
-)
-async def signup(body: SignupBody):
-    email = body.email.lower()
-
-    existing = await users_collection().find_one({"email": email})
-    if existing:
-        raise HTTPException(status_code=409, detail="Email already registered")
-
-    user_id = str(uuid.uuid4())
-    prefix = "Dr" if body.role == "driver" else "Pa"
-    username = f"{prefix}_{body.name.split()[0]}"
-    now = _now()
-
-    user_doc = {
-        "_id": user_id,
-        "role": body.role,
-        "username": username,
-        "name": body.name,
-        "email": email,
-        "password_hash": _hash_password(body.password),
-        "phone": body.phone,
-        "dob": body.dob.isoformat(),
-        "pronouns": body.pronouns,
-        "sex": body.sex,
-        "prefers_women": body.prefers_women,
-        "school": body.school or "",
-        "school_id": body.school_id or "",
-        "avatar_url": None,
-        "bio": None,
-        "location": None,
-        "email_verified": False,
-        "rating": 0.0,
-        "rating_count": 0,
-        "payment_methods": [],
-        "following": [],
-        "followers": [],
-        "created_at": now,
-    }
-
-    if body.role == "driver":
-        user_doc["license_verified"] = False
-        user_doc["license_expiration"] = (
-            body.license_expiration.isoformat() if body.license_expiration else None
-        )
-        user_doc["vehicle"] = None
-
-    await users_collection().insert_one(user_doc)
-
-    code = f"{random.randint(0, 9999):04d}"
-    await verification_codes_collection().update_one(
-        {"email": email},
-        {
-            "$set": {
-                "email": email,
-                "code": code,
-                "name": body.name,
-                "expires_at": now + timedelta(minutes=CODE_TTL_MINUTES),
-            }
-        },
-        upsert=True,
-    )
-
-    try:
-        send_verification_code(to=body.email, code=code)
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Failed to send email: {exc}")
-
-    return {"user": _doc_to_user(user_doc), "token": _make_token(user_id)}
 
 
 @router.post(
@@ -171,36 +76,6 @@ async def get_me(current_user=Depends(get_current_user)):
     description="Invalidates the current session. The client should clear its stored token.",
 )
 async def logout():
-    return {"ok": True}
-
-
-@router.post(
-    "/verify-email",
-    summary="Verify school email",
-    description="Submit the 4-digit code sent to the user's school email address.",
-    responses={400: {"description": "Invalid or expired code"}},
-)
-async def verify_email(
-    body: VerifyEmailRequest,
-    current_user=Depends(get_current_user),
-):
-    email = current_user.email.lower()
-    entry = await verification_codes_collection().find_one({"email": email})
-    if not entry:
-        raise HTTPException(status_code=404, detail="No code requested for this email")
-
-    if _now() > entry["expires_at"]:
-        await verification_codes_collection().delete_one({"email": email})
-        raise HTTPException(status_code=410, detail="Code expired, request a new one")
-
-    if body.code != entry["code"]:
-        raise HTTPException(status_code=401, detail="Invalid code")
-
-    await users_collection().update_one(
-        {"email": email}, {"$set": {"email_verified": True}}
-    )
-    await verification_codes_collection().delete_one({"email": email})
-
     return {"ok": True}
 
 

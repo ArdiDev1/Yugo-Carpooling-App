@@ -10,36 +10,58 @@ import { ROUTES } from "../../constants/routes";
 import { authService } from "../../services/auth.service";
 import { useAuthStore } from "../../store/auth.store";
 
+// Steps: 0 = role, 1 = basic info, 2 = personal details
 const TOTAL_STEPS = 3;
 
 export default function SignUpPage() {
   const navigate = useNavigate();
-  const [step, setStep]               = useState(0);
-  const [role, setRole]               = useState(null);
+  const setUser  = useAuthStore((s) => s.setUser);
+
+  const [step,         setStep]         = useState(0);
+  const [role,         setRole]         = useState(null);
   const [prefersWomen, setPrefersWomen] = useState(false);
-  const [error, setError]             = useState(null);
-  const [loading, setLoading]         = useState(false);
-  const setUser                       = useAuthStore((s) => s.setUser);
+  const [error,        setError]        = useState(null);
+  const [loading,      setLoading]      = useState(false);
 
   const { register, handleSubmit, getValues, formState: { errors } } = useForm();
 
   const goNext = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
   const goBack = () => {
+    setError(null);
     if (step === 0) navigate(ROUTES.LANDING);
     else setStep((s) => s - 1);
   };
 
+  // Step 1 → 2: validate basic info and advance
+  const onStep1Submit = () => {
+    setError(null);
+    goNext();
+  };
+
+  // Step 2: collect personal details and register
   const onFinish = async (data) => {
     setLoading(true);
     setError(null);
     try {
-      const payload = { ...data, role, prefersWomen };
-      const res = await authService.signup(payload);
+      const basic = getValues();
+      const payload = {
+        ...basic,
+        ...data,
+        role,
+        prefers_women: prefersWomen,
+      };
+
+      let res;
+      if (role === "driver") {
+        res = await authService.registerDriver(payload);
+      } else {
+        res = await authService.registerPassenger(payload);
+      }
+
       setUser(res.data.user, res.data.token);
-      if (role === "driver") navigate(ROUTES.LICENSE_UPLOAD);
-      else navigate(ROUTES.EMAIL_VERIFY);
+      navigate(ROUTES.HOME);
     } catch (e) {
-      setError(e.response?.data?.detail ?? "Signup failed. Please try again.");
+      setError(e.response?.data?.detail ?? "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -97,21 +119,22 @@ export default function SignUpPage() {
 
         {/* Step 1: Basic info */}
         {step === 1 && (
-          <form onSubmit={(e) => { e.preventDefault(); goNext(); }} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <form onSubmit={handleSubmit(onStep1Submit)} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <h2 style={{ fontSize: 20, fontWeight: 700, color: "#111827", margin: 0 }}>Basic Info</h2>
-            <Input label="Full Name"     name="name"     placeholder="First Last"           register={register} error={errors.name?.message} />
-            <Input label="School Email"  name="email"    type="email" placeholder="you@school.edu" register={register} error={errors.email?.message} />
-            <Input label="Password"      name="password" type="password" placeholder="Min 8 characters" register={register} error={errors.password?.message} />
-            <Input label="Phone Number"  name="phone"    type="tel" placeholder="(413) 555-0000" register={register} error={errors.phone?.message} />
+            <Input label="Full Name"    name="name"     placeholder="First Last"              register={register} required error={errors.name?.message} />
+            <Input label="School Email" name="email"    type="email" placeholder="you@school.edu" register={register} required error={errors.email?.message} />
+            <Input label="Password"     name="password" type="password" placeholder="Min 8 characters" register={register} required error={errors.password?.message} />
+            <Input label="Phone Number" name="phone"    type="tel" placeholder="(413) 555-0000"  register={register} required error={errors.phone?.message} />
+            {error && <p style={{ fontSize: 13, color: "#EF4444", textAlign: "center", margin: 0 }}>{error}</p>}
             <Button type="submit" fullWidth>Continue</Button>
           </form>
         )}
 
-        {/* Step 2: Personal details */}
+        {/* Step 2: Personal details → triggers registration */}
         {step === 2 && (
           <form onSubmit={handleSubmit(onFinish)} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <h2 style={{ fontSize: 20, fontWeight: 700, color: "#111827", margin: 0 }}>About You</h2>
-            <Input label="Date of Birth" name="dob"      type="date" register={register} error={errors.dob?.message} />
+            <Input label="Date of Birth" name="dob"      type="date"                           register={register} required error={errors.dob?.message} />
             <Input label="Pronouns"      name="pronouns" placeholder="e.g. she/her, they/them" register={register} />
 
             {/* Sex */}
@@ -120,7 +143,7 @@ export default function SignUpPage() {
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {SEX_OPTIONS.map((opt) => (
                   <label key={opt.value} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
-                    <input type="radio" value={opt.value} {...register("sex")} />
+                    <input type="radio" value={opt.value} {...register("sex", { required: true })} />
                     <span style={{ fontSize: 14, color: "#374151" }}>{opt.label}</span>
                   </label>
                 ))}
@@ -137,18 +160,13 @@ export default function SignUpPage() {
               This can be toggled per-ride later. It helps us match you with people you're comfortable with.
             </p>
 
-            {role === "driver" && (
-              <p style={{ fontSize: 13, color: "#6C47FF", backgroundColor: "#EDE8FF", padding: "10px 14px", borderRadius: 8, lineHeight: 1.5 }}>
-                As a driver, you'll need to upload your driver's license on the next step.
-              </p>
-            )}
-
             {error && <p style={{ fontSize: 13, color: "#EF4444", textAlign: "center", margin: 0 }}>{error}</p>}
             <Button type="submit" fullWidth loading={loading}>
-              {role === "driver" ? "Continue to License Verification" : "Create Account"}
+              Create Account
             </Button>
           </form>
         )}
+
       </div>
     </div>
   );
