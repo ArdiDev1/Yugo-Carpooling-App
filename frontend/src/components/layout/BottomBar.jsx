@@ -1,3 +1,4 @@
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ROUTES } from "../../constants/routes";
 import { useChatStore } from "../../store/chat.store";
@@ -81,27 +82,36 @@ export default function BottomBar() {
   return (
     <>
       {/* Floating plus button — gradient, just above the bar */}
-      {showFab && <button
-        onClick={() => navigate(ROUTES.CREATE)}
-        style={{
-          position:        "absolute",
-          bottom:          `calc(60px + env(safe-area-inset-bottom) + 14px)`,
-          right:            16,
-          width:           46,
-          height:          46,
-          borderRadius:    "50%",
-          background:      "linear-gradient(135deg, #f08a4b 0%, #e24182 100%)",
-          border:          "none",
-          cursor:          "pointer",
-          display:         "flex",
-          alignItems:      "center",
-          justifyContent:  "center",
-          boxShadow:       "0 4px 16px rgba(226,65,130,0.4)",
-          zIndex:          52,
-        }}
-      >
-        <PlusIcon />
-      </button>}
+      <AnimatePresence>
+        {showFab && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            whileTap={{ scale: 0.85 }}
+            onClick={() => navigate(ROUTES.CREATE)}
+            style={{
+              position:        "absolute",
+              bottom:          `calc(60px + env(safe-area-inset-bottom) + 14px)`,
+              right:            16,
+              width:           46,
+              height:          46,
+              borderRadius:    "50%",
+              background:      "linear-gradient(135deg, #f08a4b 0%, #e24182 100%)",
+              border:          "none",
+              cursor:          "pointer",
+              display:         "flex",
+              alignItems:      "center",
+              justifyContent:  "center",
+              boxShadow:       "0 4px 16px rgba(226,65,130,0.4)",
+              zIndex:          52,
+            }}
+          >
+            <PlusIcon />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Bottom nav bar */}
       <nav

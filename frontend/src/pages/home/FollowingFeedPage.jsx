@@ -1,33 +1,44 @@
+import { motion } from "framer-motion";
 import { useAuthStore } from "../../store/auth.store";
 import { useFeed } from "../../hooks/useFeed";
 import { getUserById } from "../../mocks/users";
 import RequestCard from "../../components/feed/RequestCard";
 import OfferCard from "../../components/feed/OfferCard";
+import { SkeletonFeed } from "../../components/ui/Skeleton";
 
 export default function FollowingFeedPage() {
   const user = useAuthStore((s) => s.user);
   const { posts, isLoading } = useFeed("following");
 
   const followingIds = user?.following ?? [];
-  const filtered     = posts.filter((p) => followingIds.includes(p.authorId));
+  const filtered = posts.filter((p) => followingIds.includes(p.authorId));
+
+  if (isLoading) {
+    return <SkeletonFeed count={3} />;
+  }
 
   if (!filtered.length) {
     return (
-      <div style={{ textAlign: "center", paddingTop: 60, color: "#9CA3AF", padding: "60px 24px 0" }}>
-        <div style={{ fontSize: 40, marginBottom: 12 }}>👥</div>
-        <p style={{ fontSize: 15 }}>No posts from people you follow yet.</p>
-        <p style={{ fontSize: 13, marginTop: 6 }}>Follow other riders on their profiles!</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+        style={{ textAlign: "center", paddingTop: 80, color: "var(--color-muted)", padding: "80px 24px 0" }}
+      >
+        <div style={{ fontSize: 48, marginBottom: 16, filter: "grayscale(0.3)" }}>&#128101;</div>
+        <p style={{ fontSize: 16, fontWeight: 600, color: "var(--color-text)", marginBottom: 6 }}>No posts yet</p>
+        <p style={{ fontSize: 13, color: "var(--color-muted)" }}>Follow other riders on their profiles!</p>
+      </motion.div>
     );
   }
 
   return (
-    <div style={{ padding: "8px 12px" }}>
-      {filtered.map((post) => {
+    <div style={{ padding: "10px 14px" }}>
+      {filtered.map((post, i) => {
         const author = getUserById(post.authorId);
         return post.type === "request"
-          ? <RequestCard key={post.id} post={post} author={author} />
-          : <OfferCard   key={post.id} post={post} author={author} />;
+          ? <RequestCard key={post.id} post={post} author={author} index={i} />
+          : <OfferCard   key={post.id} post={post} author={author} index={i} />;
       })}
     </div>
   );
