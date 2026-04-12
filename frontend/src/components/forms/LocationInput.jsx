@@ -12,19 +12,36 @@ export default function LocationInput({ label, name, placeholder, register, erro
     ? register(name)
     : { onChange: () => {}, onBlur: () => {}, ref: () => {} };
 
-  // Init Google Places AutocompleteService
+  // Load Google Maps script from env and init AutocompleteService
   useEffect(() => {
     const initService = () => {
       if (window.google?.maps?.places?.AutocompleteService) {
         autocompleteRef.current = new window.google.maps.places.AutocompleteService();
       }
     };
-    initService();
-    // If script hasn't loaded yet, retry after a short delay
-    if (!autocompleteRef.current) {
-      const timer = setTimeout(initService, 1000);
-      return () => clearTimeout(timer);
+
+    // If already loaded, just init
+    if (window.google?.maps?.places) {
+      initService();
+      return;
     }
+
+    // Load the script dynamically using the env key
+    const key = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (!key) return;
+
+    const existing = document.querySelector('script[src*="maps.googleapis.com"]');
+    if (existing) {
+      existing.addEventListener("load", initService);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.onload = initService;
+    document.head.appendChild(script);
   }, []);
 
   // Close dropdown on outside click
