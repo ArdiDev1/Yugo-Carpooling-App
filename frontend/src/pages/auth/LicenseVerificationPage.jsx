@@ -28,10 +28,10 @@ export default function LicenseVerificationPage() {
       formData.append("file", fileRef.current.files[0]);
       formData.append("expiration_date", data.expirationDate);
       await authService.uploadLicense(formData);
-      navigate(ROUTES.EMAIL_VERIFY);
+      navigate(ROUTES.HOME);
     } catch {
       // proceed anyway — license can be re-uploaded later
-      navigate(ROUTES.EMAIL_VERIFY);
+      navigate(ROUTES.HOME);
     } finally {
       setLoading(false);
     }
@@ -77,7 +77,7 @@ export default function LicenseVerificationPage() {
           </Button>
           <button
             type="button"
-            onClick={() => navigate(ROUTES.EMAIL_VERIFY)}
+            onClick={() => navigate(ROUTES.HOME)}
             style={{ background: "none", border: "none", fontSize: 13, color: "#9CA3AF", cursor: "pointer", textDecoration: "underline" }}
           >
             Skip for now

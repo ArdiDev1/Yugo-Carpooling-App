@@ -6,16 +6,14 @@ import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import { useAuthStore } from "../../store/auth.store";
 import { authService } from "../../services/auth.service";
-import { MOCK_CURRENT_USER } from "../../mocks/users";
 import { ROUTES } from "../../constants/routes";
-
-const USE_MOCK = false;
 
 export default function LoginPage() {
   const navigate   = useNavigate();
   const setUser    = useAuthStore((s) => s.setUser);
-  const [error, setError]     = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [error, setError]       = useState(null);
+  const [loading, setLoading]   = useState(false);
+  const [accounts, setAccounts] = useState(null); // dual-account picker
 
   const { register, handleSubmit, formState: { errors } } = useForm();
 
@@ -23,21 +21,69 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     try {
-      if (USE_MOCK) {
-        // Mock login — use first mock user
-        setUser(MOCK_CURRENT_USER, "mock-token-123");
-        navigate(ROUTES.HOME);
+      const res = await authService.login(data.email, data.password);
+
+      // If user has both driver + passenger accounts
+      if (res.data.accounts) {
+        setAccounts(res.data.accounts);
+        setLoading(false);
         return;
       }
-      const res = await authService.login(data.email, data.password);
+
       setUser(res.data.user, res.data.token);
       navigate(ROUTES.HOME);
     } catch (e) {
-      setError(e.response?.data?.message ?? "Login failed. Please try again.");
+      setError(e.response?.data?.detail ?? "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
+  const pickAccount = (account) => {
+    setUser(account.user, account.token);
+    navigate(ROUTES.HOME);
+  };
+
+  // Dual-account picker screen
+  if (accounts) {
+    return (
+      <div style={{ height: "100dvh", display: "flex", flexDirection: "column", backgroundColor: "#F7F7F8" }}>
+        <PageHeader title="Choose Account" showBack onBack={() => setAccounts(null)} />
+        <div style={{ flex: 1, overflowY: "auto", padding: "24px 20px" }}>
+          <p style={{ fontSize: 15, color: "#6B7280", marginBottom: 20, lineHeight: 1.5 }}>
+            You have two accounts with this email. Which one would you like to use?
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {accounts.map((acc) => (
+              <button
+                key={acc.user.role}
+                onClick={() => pickAccount(acc)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 16,
+                  padding: "18px 20px", borderRadius: 12,
+                  border: "2px solid #E5E7EB", backgroundColor: "#fff",
+                  cursor: "pointer", textAlign: "left",
+                  transition: "border-color 0.15s",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = "#6C47FF"}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = "#E5E7EB"}
+              >
+                <span style={{ fontSize: 36 }}>{acc.user.role === "driver" ? "🚗" : "🙋"}</span>
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>
+                    {acc.user.role === "driver" ? "Driver" : "Passenger"}
+                  </div>
+                  <div style={{ fontSize: 13, color: "#6B7280" }}>
+                    {acc.user.username} — {acc.user.school || "No school set"}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ height: "100dvh", display: "flex", flexDirection: "column", backgroundColor: "#F7F7F8" }}>

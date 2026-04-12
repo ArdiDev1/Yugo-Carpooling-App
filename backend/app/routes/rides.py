@@ -4,13 +4,21 @@ import uuid
 
 from app.models.ride import RideOffer, RideRequest, PostCreate
 from app.auth.deps import get_current_user
-from app.db.mongo import posts_collection, get_db
+from app.db.mongo import rides_collection, users_collection
+from app.services.GeminiMatching import rank_feed
 
 router = APIRouter()
 
 
-def _users_col():
-    return get_db()["users"]
+def _ride_from_doc(doc: dict):
+    data = {**doc, "id": doc.pop("_id")}
+    # Ensure date is an ISO string for Pydantic
+    d = data.get("date")
+    if hasattr(d, "isoformat"):
+        data["date"] = d.isoformat()
+    if data.get("type") == "offer":
+        return RideOffer(**data)
+    return RideRequest(**data)
 
 
 def _doc_to_mini_author(doc: dict) -> dict:
@@ -27,59 +35,72 @@ def _doc_to_mini_author(doc: dict) -> dict:
     }
 
 
-def _doc_to_post(doc: dict, current_user_id: str = None, author_doc: dict = None) -> dict:
-    """Convert a MongoDB post doc to a camelCase response dict."""
-    data = {k: v for k, v in doc.items() if k != "liked_by"}
-    data["id"] = data.pop("_id")
-
-    # Ensure date is an ISO string for Pydantic
-    d = data.get("date")
-    if hasattr(d, "isoformat"):
-        data["date"] = d.isoformat()
-
-    try:
-        if data.get("type") == "offer":
-            post_obj = RideOffer(**data)
-        else:
-            post_obj = RideRequest(**data)
-        post_dict = post_obj.model_dump(by_alias=True, mode="json")
-    except Exception:
-        post_dict = data
-
-    liked_by = doc.get("liked_by", [])
-    post_dict["isLikedByMe"] = (current_user_id in liked_by) if current_user_id else False
-    post_dict["likes"] = len(liked_by) if liked_by else data.get("likes", 0)
-
-    if author_doc:
-        post_dict["author"] = _doc_to_mini_author(author_doc)
-
-    return post_dict
-
-
-async def _enrich_posts(docs: list, current_user_id: str) -> list:
-    """Batch-fetch author docs and embed them in each post."""
-    if not docs:
+async def _enrich_with_authors(posts, current_user_id: str = None):
+    """Attach author info to each post dict."""
+    if not posts:
         return []
-    author_ids = list({doc["author_id"] for doc in docs})
-    author_cursor = _users_col().find({"_id": {"$in": author_ids}})
-    author_docs = await author_cursor.to_list(None)
-    author_map = {d["_id"]: d for d in author_docs}
-    return [
-        _doc_to_post(doc, current_user_id, author_map.get(doc["author_id"]))
-        for doc in docs
-    ]
+
+    # Accept either Pydantic models or dicts
+    def get_author_id(p):
+        return p.author_id if hasattr(p, "author_id") else p.get("author_id", "")
+
+    author_ids = list({get_author_id(p) for p in posts})
+    user_docs = await users_collection().find(
+        {"_id": {"$in": author_ids}},
+    ).to_list(len(author_ids))
+    authors_map = {d["_id"]: d for d in user_docs}
+
+    result = []
+    for p in posts:
+        if hasattr(p, "model_dump"):
+            post_dict = p.model_dump(by_alias=True, mode="json")
+        else:
+            post_dict = {k: v for k, v in p.items()}
+            post_dict["id"] = post_dict.pop("_id", post_dict.get("id"))
+
+        aid = get_author_id(p)
+        author_doc = authors_map.get(aid, {})
+        post_dict["author"] = _doc_to_mini_author(author_doc) if author_doc else {
+            "id": aid, "name": "Unknown", "username": "user", "school": "", "avatarUrl": None, "rating": 0,
+        }
+
+        # Like info
+        liked_by = p.get("liked_by", []) if isinstance(p, dict) else []
+        if current_user_id and liked_by:
+            post_dict["isLikedByMe"] = current_user_id in liked_by
+            post_dict["likes"] = len(liked_by)
+
+        result.append(post_dict)
+
+    return result
 
 
 @router.get(
     "/feed",
     summary="Get For You feed",
-    description="Returns open posts from users with the opposite role — passengers see driver offers, drivers see passenger requests.",
+    description="Returns open posts ranked by relevance. "
+                "If the user has active requests, offers are sorted by best match. "
+                "Otherwise, a random selection is shown.",
     responses={401: {"description": "Missing or invalid token"}},
 )
 async def get_feed(current_user=Depends(get_current_user)):
     opposite = "offer" if current_user.role == "passenger" else "request"
-    docs = await posts_collection().find({"status": "open", "type": opposite}).to_list(None)
-    return await _enrich_posts(docs, current_user.id)
+
+    docs = await rides_collection().find(
+        {"status": "open", "type": opposite}
+    ).to_list(200)
+
+    posts = [_ride_from_doc(d) for d in docs]
+
+    # Get user's own active requests/offers to match against
+    my_type = "request" if current_user.role == "passenger" else "offer"
+    my_docs = await rides_collection().find(
+        {"author_id": current_user.id, "status": "open", "type": my_type}
+    ).to_list(50)
+    my_posts = [_ride_from_doc(d) for d in my_docs]
+
+    ranked = rank_feed(posts, my_posts, current_user)
+    return await _enrich_with_authors(ranked, current_user.id)
 
 
 @router.get(
@@ -89,11 +110,16 @@ async def get_feed(current_user=Depends(get_current_user)):
     responses={401: {"description": "Missing or invalid token"}},
 )
 async def get_following_feed(current_user=Depends(get_current_user)):
-    docs = await posts_collection().find({
-        "author_id": {"$in": current_user.following},
-        "status": "open",
-    }).to_list(None)
-    return await _enrich_posts(docs, current_user.id)
+    following = current_user.following or []
+    if not following:
+        return []
+
+    docs = await rides_collection().find(
+        {"author_id": {"$in": following}, "status": "open"}
+    ).to_list(200)
+
+    posts = [_ride_from_doc(d) for d in docs]
+    return await _enrich_with_authors(posts, current_user.id)
 
 
 @router.get(
@@ -103,8 +129,9 @@ async def get_following_feed(current_user=Depends(get_current_user)):
     responses={401: {"description": "Missing or invalid token"}},
 )
 async def get_posts_by_user(user_id: str, current_user=Depends(get_current_user)):
-    docs = await posts_collection().find({"author_id": user_id}).to_list(None)
-    return [_doc_to_post(doc, current_user.id) for doc in docs]
+    docs = await rides_collection().find({"author_id": user_id}).to_list(None)
+    posts = [_ride_from_doc(d) for d in docs]
+    return await _enrich_with_authors(posts, current_user.id)
 
 
 @router.get(
@@ -114,11 +141,12 @@ async def get_posts_by_user(user_id: str, current_user=Depends(get_current_user)
     responses={401: {"description": "Missing or invalid token"}, 404: {"description": "Post not found"}},
 )
 async def get_post(post_id: str, current_user=Depends(get_current_user)):
-    doc = await posts_collection().find_one({"_id": post_id})
+    doc = await rides_collection().find_one({"_id": post_id})
     if not doc:
         raise HTTPException(status_code=404, detail="Post not found")
-    author_doc = await _users_col().find_one({"_id": doc["author_id"]})
-    return _doc_to_post(doc, current_user.id, author_doc)
+    post = _ride_from_doc(doc)
+    enriched = await _enrich_with_authors([post], current_user.id)
+    return enriched[0]
 
 
 @router.post(
@@ -133,32 +161,37 @@ async def create_post(body: PostCreate, current_user=Depends(get_current_user)):
     post_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc)
 
-    post_data = body.model_dump(by_alias=False)
-    # Store date as ISO string
-    if hasattr(post_data.get("date"), "isoformat"):
-        post_data["date"] = post_data["date"].isoformat()
+    body_data = body.model_dump(by_alias=False)
+    # BSON cannot encode datetime.date — store as ISO string
+    if body_data.get("date") and hasattr(body_data["date"], "isoformat"):
+        body_data["date"] = body_data["date"].isoformat()
 
     doc = {
-        "_id":       post_id,
+        "_id": post_id,
         "author_id": current_user.id,
-        "status":    "open",
-        "likes":     0,
-        "comments":  0,
-        "liked_by":  [],
+        "status": "open",
+        "likes": 0,
+        "comments": 0,
+        "liked_by": [],
         "created_at": now,
-        **post_data,
+        "school": current_user.school,
+        **body_data,
     }
 
-    await posts_collection().insert_one(doc)
-    author_doc = await _users_col().find_one({"_id": current_user.id})
-    return _doc_to_post(doc, current_user.id, author_doc)
+    if body.type == "offer":
+        doc["seats_taken"] = 0
+
+    await rides_collection().insert_one(doc)
+
+    result_doc = await rides_collection().find_one({"_id": post_id})
+    enriched = await _enrich_with_authors([_ride_from_doc(result_doc)], current_user.id)
+    return enriched[0]
 
 
 @router.patch(
     "/{post_id}",
     summary="Update a post",
-    description="Partially update a post's fields. Only the post's author can edit it. "
-                "Use `{\"status\": \"closed\"}` to close a ride.",
+    description="Partially update a post's fields. Only the post's author can edit it.",
     responses={
         401: {"description": "Missing or invalid token"},
         403: {"description": "Not the post author"},
@@ -166,16 +199,19 @@ async def create_post(body: PostCreate, current_user=Depends(get_current_user)):
     },
 )
 async def update_post(post_id: str, updates: dict, current_user=Depends(get_current_user)):
-    doc = await posts_collection().find_one({"_id": post_id})
+    doc = await rides_collection().find_one({"_id": post_id})
     if not doc:
         raise HTTPException(status_code=404, detail="Post not found")
     if doc["author_id"] != current_user.id:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    await posts_collection().update_one({"_id": post_id}, {"$set": updates})
-    updated = await posts_collection().find_one({"_id": post_id})
-    author_doc = await _users_col().find_one({"_id": current_user.id})
-    return _doc_to_post(updated, current_user.id, author_doc)
+    allowed = {"status", "content", "from_location", "to_location", "date", "time", "flexible", "prefers_women"}
+    clean = {k: v for k, v in updates.items() if k in allowed}
+
+    await rides_collection().update_one({"_id": post_id}, {"$set": clean})
+    updated = await rides_collection().find_one({"_id": post_id})
+    enriched = await _enrich_with_authors([_ride_from_doc(updated)], current_user.id)
+    return enriched[0]
 
 
 @router.delete(
@@ -189,12 +225,13 @@ async def update_post(post_id: str, updates: dict, current_user=Depends(get_curr
     },
 )
 async def delete_post(post_id: str, current_user=Depends(get_current_user)):
-    doc = await posts_collection().find_one({"_id": post_id})
+    doc = await rides_collection().find_one({"_id": post_id})
     if not doc:
         raise HTTPException(status_code=404, detail="Post not found")
     if doc["author_id"] != current_user.id:
         raise HTTPException(status_code=403, detail="Forbidden")
-    await posts_collection().delete_one({"_id": post_id})
+
+    await rides_collection().delete_one({"_id": post_id})
     return {"ok": True}
 
 
@@ -205,11 +242,11 @@ async def delete_post(post_id: str, current_user=Depends(get_current_user)):
     responses={401: {"description": "Missing or invalid token"}, 404: {"description": "Post not found"}},
 )
 async def like_post(post_id: str, current_user=Depends(get_current_user)):
-    doc = await posts_collection().find_one({"_id": post_id})
+    doc = await rides_collection().find_one({"_id": post_id})
     if not doc:
         raise HTTPException(status_code=404, detail="Post not found")
     if current_user.id not in doc.get("liked_by", []):
-        await posts_collection().update_one(
+        await rides_collection().update_one(
             {"_id": post_id},
             {"$addToSet": {"liked_by": current_user.id}, "$inc": {"likes": 1}},
         )
@@ -223,11 +260,11 @@ async def like_post(post_id: str, current_user=Depends(get_current_user)):
     responses={401: {"description": "Missing or invalid token"}, 404: {"description": "Post not found"}},
 )
 async def unlike_post(post_id: str, current_user=Depends(get_current_user)):
-    doc = await posts_collection().find_one({"_id": post_id})
+    doc = await rides_collection().find_one({"_id": post_id})
     if not doc:
         raise HTTPException(status_code=404, detail="Post not found")
     if current_user.id in doc.get("liked_by", []):
-        await posts_collection().update_one(
+        await rides_collection().update_one(
             {"_id": post_id},
             {"$pull": {"liked_by": current_user.id}, "$inc": {"likes": -1}},
         )

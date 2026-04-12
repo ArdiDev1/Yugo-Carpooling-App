@@ -28,12 +28,13 @@ export default function ForYouPage() {
   }
 
   return (
-    <div style={{ padding: "8px 12px" }}>
-      {posts.map((post) =>
-        post.type === "request"
-          ? <RequestCard key={post.id} post={post} author={post.author} />
-          : <OfferCard   key={post.id} post={post} author={post.author} />
-      )}
+    <div style={{ padding: "10px 14px" }}>
+      {posts.map((post, i) => {
+        const author = post.author ?? { name: "Unknown", username: "user", school: "" };
+        return post.type === "request"
+          ? <RequestCard key={post.id} post={post} author={author} index={i} />
+          : <OfferCard   key={post.id} post={post} author={author} index={i} />;
+      })}
     </div>
   );
 }

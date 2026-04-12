@@ -56,6 +56,10 @@ def verification_tokens_collection():
     return get_db()["verification_tokens"]
 
 
+def rides_collection():
+    return get_db()["rides"]
+
+
 async def _ensure_indexes() -> None:
     users = users_collection()
     await users.create_index([("email", 1), ("role", 1)], unique=True)
@@ -73,3 +77,10 @@ async def _ensure_indexes() -> None:
     tokens = verification_tokens_collection()
     await tokens.create_index("token", unique=True)
     await tokens.create_index("expires_at", expireAfterSeconds=0)
+
+    rides = rides_collection()
+    await rides.create_index("author_id")
+    await rides.create_index("status")
+    await rides.create_index("type")
+    await rides.create_index("date")
+    await rides.create_index("school")

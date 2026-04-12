@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import PageHeader from "../../components/layout/PageHeader";
@@ -6,6 +6,7 @@ import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import Toggle from "../../components/ui/Toggle";
 import { SEX_OPTIONS } from "../../constants/categories";
+import { SCHOOLS, getSchoolByEmail } from "../../constants/schools";
 import { ROUTES } from "../../constants/routes";
 import { authService } from "../../services/auth.service";
 import { useAuthStore } from "../../store/auth.store";
@@ -19,13 +20,26 @@ export default function SignUpPage() {
   const navigate = useNavigate();
   const setUser  = useAuthStore((s) => s.setUser);
 
-  const [step,         setStep]         = useState(0);
-  const [role,         setRole]         = useState(null);
-  const [prefersWomen, setPrefersWomen] = useState(false);
-  const [error,        setError]        = useState(null);
-  const [loading,      setLoading]      = useState(false);
+  const [step,           setStep]           = useState(0);
+  const [role,           setRole]           = useState(null);
+  const [prefersWomen,   setPrefersWomen]   = useState(false);
+  const [error,          setError]          = useState(null);
+  const [loading,        setLoading]        = useState(false);
+  const [detectedSchool, setDetectedSchool] = useState(null);
 
-  const { register, handleSubmit, getValues, formState: { errors } } = useForm();
+  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+
+  const emailValue = watch("email");
+
+  // Auto-detect school from email domain
+  useEffect(() => {
+    if (emailValue) {
+      const school = getSchoolByEmail(emailValue);
+      setDetectedSchool(school);
+    } else {
+      setDetectedSchool(null);
+    }
+  }, [emailValue]);
 
   const goNext = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
   const goBack = () => {
@@ -45,23 +59,22 @@ export default function SignUpPage() {
     setLoading(true);
     setError(null);
     try {
-      const basic = getValues();
+      const school = detectedSchool ?? SCHOOLS.find((s) => s.id === data.schoolId);
       const payload = {
-        ...basic,
         ...data,
         role,
-        prefers_women: prefersWomen,
+        prefersWomen,
+        school: school?.name || data.schoolManual || "",
+        schoolId: school?.id || "",
       };
+      // Remove helper fields not expected by backend
+      delete payload.schoolId;
+      delete payload.schoolManual;
 
-      let res;
-      if (role === "driver") {
-        res = await authService.registerDriver(payload);
-      } else {
-        res = await authService.registerPassenger(payload);
-      }
-
+      const res = await authService.signup(payload);
       setUser(res.data.user, res.data.token);
-      navigate(ROUTES.HOME);
+      if (role === "driver") navigate(ROUTES.LICENSE_UPLOAD);
+      else navigate(ROUTES.EMAIL_VERIFY);
     } catch (e) {
       setError(e.response?.data?.detail ?? "Registration failed. Please try again.");
     } finally {
@@ -125,8 +138,41 @@ export default function SignUpPage() {
             <h2 style={{ fontSize: 20, fontWeight: 700, color: "#111827", margin: 0 }}>Basic Info</h2>
             <Input label="Full Name"    name="name"     placeholder="First Last"              register={register} required error={errors.name?.message} />
             <Input label="School Email" name="email"    type="email" placeholder="you@school.edu" register={register} required error={errors.email?.message} />
+
+            {/* School — auto-detected or manual */}
+            {detectedSchool ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text)" }}>School</span>
+                <div style={{
+                  padding: "10px 12px", borderRadius: 8, fontSize: 15,
+                  backgroundColor: "#ECFDF5", color: "#065F46", fontWeight: 600,
+                  border: "1px solid #BBF7D0",
+                }}>
+                  {detectedSchool.name}
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text)" }}>School</span>
+                <select
+                  {...register("schoolId")}
+                  style={{
+                    padding: "10px 12px", borderRadius: 8, fontSize: 15,
+                    border: "1px solid var(--color-border)", backgroundColor: "var(--color-surface)",
+                    color: "var(--color-text)", cursor: "pointer",
+                  }}
+                >
+                  <option value="">Select your school...</option>
+                  {SCHOOLS.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            )}
+
             <Input label="Password"     name="password" type="password" placeholder="Min 8 characters" register={register} required error={errors.password?.message} />
-            <Input label="Phone Number" name="phone"    type="tel" placeholder="(413) 555-0000"  register={register} required error={errors.phone?.message} />
+            <Input label="Phone Number"  name="phone"    type="tel" placeholder="(413) 555-0000"  register={register} required error={errors.phone?.message} />
             {error && <p style={{ fontSize: 13, color: "#EF4444", textAlign: "center", margin: 0 }}>{error}</p>}
             <Button type="submit" fullWidth>Continue</Button>
           </form>
@@ -162,9 +208,15 @@ export default function SignUpPage() {
               This can be toggled per-ride later. It helps us match you with people you're comfortable with.
             </p>
 
+            {role === "driver" && (
+              <p style={{ fontSize: 13, color: "#6C47FF", backgroundColor: "#EDE8FF", padding: "10px 14px", borderRadius: 8, lineHeight: 1.5 }}>
+                As a driver, you'll need to upload your driver's license on the next step.
+              </p>
+            )}
+
             {error && <p style={{ fontSize: 13, color: "#EF4444", textAlign: "center", margin: 0 }}>{error}</p>}
             <Button type="submit" fullWidth loading={loading}>
-              Create Account
+              {role === "driver" ? "Continue to License Verification" : "Create Account"}
             </Button>
           </form>
         )}

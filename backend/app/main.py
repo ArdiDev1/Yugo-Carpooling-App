@@ -7,7 +7,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes import auth, users, rides
-from app.auth import login
 from app.db.mongo import connect_to_mongo, close_mongo_connection
 
 
@@ -22,11 +21,7 @@ tags_metadata = [
         "name": "Auth",
         "description": "Login, logout, profile retrieval, and driver license upload.",
     },
-    {
-        "name": "Register",
-        "description": "Passenger and driver registration.",
-    },
-    {
+{
         "name": "Users",
         "description": "View and manage user profiles, follows, and ratings.",
     },
@@ -55,7 +50,6 @@ app.add_middleware(
 app.include_router(auth.router,  prefix="/api/v1/auth",  tags=["Auth"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 app.include_router(rides.router, prefix="/api/v1/posts", tags=["Posts"])
-app.include_router(login.router, prefix="/api/v1",       tags=["Register"])
 
 
 @app.get("/", tags=["Health"])

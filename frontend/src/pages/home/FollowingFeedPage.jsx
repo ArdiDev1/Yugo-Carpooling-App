@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { useFeed } from "../../hooks/useFeed";
 import RequestCard from "../../components/feed/RequestCard";
 import OfferCard from "../../components/feed/OfferCard";
@@ -8,11 +9,7 @@ export default function FollowingFeedPage() {
   const { posts, isLoading } = useFeed("following");
 
   if (isLoading) {
-    return (
-      <div style={{ display: "flex", justifyContent: "center", paddingTop: 40 }}>
-        <Spinner />
-      </div>
-    );
+    return <SkeletonFeed count={4} />;
   }
 
   if (!posts.length) {
@@ -31,12 +28,13 @@ export default function FollowingFeedPage() {
   }
 
   return (
-    <div style={{ padding: "8px 12px" }}>
-      {posts.map((post) =>
-        post.type === "request"
-          ? <RequestCard key={post.id} post={post} author={post.author} />
-          : <OfferCard   key={post.id} post={post} author={post.author} />
-      )}
+    <div style={{ padding: "10px 14px" }}>
+      {posts.map((post, i) => {
+        const author = post.author ?? { name: "Unknown", username: "user", school: "" };
+        return post.type === "request"
+          ? <RequestCard key={post.id} post={post} author={author} index={i} />
+          : <OfferCard   key={post.id} post={post} author={author} index={i} />;
+      })}
     </div>
   );
 }
