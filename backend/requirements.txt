@@ -4,3 +4,5 @@ pydantic[email]
 python-dotenv
 python-multipart
 httpx
+motor
+bcrypt

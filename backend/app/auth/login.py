@@ -1,11 +1,17 @@
 import random
 import secrets
+import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Dict
 
+import bcrypt
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
 
+from app.db.mongo import (
+    users_collection,
+    verification_codes_collection,
+    verification_tokens_collection,
+)
 from app.models.passenger import Passenger, PassengerCreate
 from app.services.email import send_verification_code
 
@@ -13,10 +19,6 @@ router = APIRouter()
 
 CODE_TTL_MINUTES = 10
 TOKEN_TTL_MINUTES = 30
-
-_pending_codes: Dict[str, dict] = {}
-_verification_tokens: Dict[str, dict] = {}
-_passengers: Dict[str, Passenger] = {}
 
 
 class RequestCodePayload(BaseModel):
@@ -37,17 +39,34 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def _hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+
 @router.post("/auth/passenger/request-code")
-def request_code(payload: RequestCodePayload):
+async def request_code(payload: RequestCodePayload):
     if not payload.email.lower().endswith(".edu"):
         raise HTTPException(status_code=400, detail="Must use a .edu school email")
 
+    email = payload.email.lower()
+
+    existing = await users_collection().find_one({"email": email})
+    if existing:
+        raise HTTPException(status_code=409, detail="Email already registered")
+
     code = f"{random.randint(0, 9999):04d}"
-    _pending_codes[payload.email.lower()] = {
-        "code": code,
-        "name": payload.name,
-        "expires_at": _now() + timedelta(minutes=CODE_TTL_MINUTES),
-    }
+    await verification_codes_collection().update_one(
+        {"email": email},
+        {
+            "$set": {
+                "email": email,
+                "code": code,
+                "name": payload.name,
+                "expires_at": _now() + timedelta(minutes=CODE_TTL_MINUTES),
+            }
+        },
+        upsert=True,
+    )
 
     try:
         send_verification_code(to=payload.email, code=code)
@@ -58,61 +77,97 @@ def request_code(payload: RequestCodePayload):
 
 
 @router.post("/auth/passenger/verify-code")
-def verify_code(payload: VerifyCodePayload):
-    entry = _pending_codes.get(payload.email.lower())
+async def verify_code(payload: VerifyCodePayload):
+    email = payload.email.lower()
+    entry = await verification_codes_collection().find_one({"email": email})
     if not entry:
         raise HTTPException(status_code=404, detail="No code requested for this email")
 
     if _now() > entry["expires_at"]:
-        _pending_codes.pop(payload.email.lower(), None)
+        await verification_codes_collection().delete_one({"email": email})
         raise HTTPException(status_code=410, detail="Code expired, request a new one")
 
     if payload.code != entry["code"]:
         raise HTTPException(status_code=401, detail="Invalid code")
 
     token = secrets.token_urlsafe(16)
-    _verification_tokens[token] = {
-        "email": payload.email.lower(),
-        "expires_at": _now() + timedelta(minutes=TOKEN_TTL_MINUTES),
-    }
-    _pending_codes.pop(payload.email.lower(), None)
+    await verification_tokens_collection().insert_one(
+        {
+            "token": token,
+            "email": email,
+            "expires_at": _now() + timedelta(minutes=TOKEN_TTL_MINUTES),
+        }
+    )
+    await verification_codes_collection().delete_one({"email": email})
 
     return {"verification_token": token}
 
 
 @router.post("/auth/passenger/register", response_model=Passenger)
-def register_passenger(payload: RegisterPayload):
-    token_entry = _verification_tokens.get(payload.verification_token)
+async def register_passenger(payload: RegisterPayload):
+    token_entry = await verification_tokens_collection().find_one(
+        {"token": payload.verification_token}
+    )
     if not token_entry:
         raise HTTPException(status_code=401, detail="Invalid verification token")
 
     if _now() > token_entry["expires_at"]:
-        _verification_tokens.pop(payload.verification_token, None)
+        await verification_tokens_collection().delete_one(
+            {"token": payload.verification_token}
+        )
         raise HTTPException(status_code=410, detail="Verification token expired")
 
-    if token_entry["email"] != payload.email.lower():
+    email = payload.email.lower()
+    if token_entry["email"] != email:
         raise HTTPException(status_code=400, detail="Token does not match email")
 
-    if payload.email.lower() in _passengers:
+    existing = await users_collection().find_one({"email": email})
+    if existing:
         raise HTTPException(status_code=409, detail="Passenger already registered")
 
-    passenger = Passenger(
-        id=f"usr_{secrets.token_hex(6)}",
-        username=payload.email.split("@")[0],
-        name=payload.name,
-        email=payload.email,
-        phone=payload.phone,
-        dob=payload.dob,
-        pronouns=payload.pronouns,
-        sex=payload.sex,
-        prefers_women=payload.prefers_women,
-        school=payload.school,
-        school_id=payload.school_id,
-        email_verified=True,
-        created_at=_now(),
+    now = _now()
+    user_doc = {
+        "_id": str(uuid.uuid4()),
+        "role": "passenger",
+        "username": payload.email.split("@")[0],
+        "name": payload.name,
+        "email": email,
+        "password_hash": _hash_password(payload.password),
+        "phone": payload.phone,
+        "dob": payload.dob.isoformat(),
+        "pronouns": payload.pronouns,
+        "sex": payload.sex,
+        "prefers_women": payload.prefers_women,
+        "school": payload.school or "",
+        "school_id": payload.school_id or "",
+        "avatar_url": None,
+        "bio": None,
+        "location": None,
+        "email_verified": True,
+        "rating": 0.0,
+        "rating_count": 0,
+        "payment_methods": [],
+        "following": [],
+        "followers": [],
+        "created_at": now,
+    }
+    await users_collection().insert_one(user_doc)
+    await verification_tokens_collection().delete_one(
+        {"token": payload.verification_token}
     )
 
-    _passengers[payload.email.lower()] = passenger
-    _verification_tokens.pop(payload.verification_token, None)
-
-    return passenger
+    return Passenger(
+        id=user_doc["_id"],
+        username=user_doc["username"],
+        name=user_doc["name"],
+        email=user_doc["email"],
+        phone=user_doc["phone"],
+        dob=payload.dob,
+        pronouns=user_doc["pronouns"],
+        sex=user_doc["sex"],
+        prefers_women=user_doc["prefers_women"],
+        school=user_doc["school"],
+        school_id=user_doc["school_id"],
+        email_verified=True,
+        created_at=now,
+    )
