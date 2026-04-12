@@ -102,6 +102,15 @@ export default function ChatRoomPage() {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
+  function renderGasBotText(text) {
+    // Split on **bold** markers and alternate plain / bold spans
+    return text.split(/\*\*(.*?)\*\*/g).map((part, i) =>
+      i % 2 === 1
+        ? <strong key={i} style={{ fontWeight: 700 }}>{part}</strong>
+        : part
+    );
+  }
+
   let prevSender = null;
 
   return (
@@ -159,7 +168,7 @@ export default function ChatRoomPage() {
                   <span style={{ fontSize: 13, fontWeight: 700, color: "#6C47FF" }}>GasBot</span>
                 </div>
                 <div style={{ fontSize: 13, color: "#4C1D95", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
-                  {msg.text}
+                  {renderGasBotText(msg.text)}
                 </div>
               </div>
             );

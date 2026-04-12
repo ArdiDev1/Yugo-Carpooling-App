@@ -33,7 +33,7 @@ async def generate_gasbot_message(
         return (
             f"👋 Hey {passenger_name} and {driver_name}! This is your ride chat for "
             f"**{from_location} → {to_location}** on {ride_date}.\n\n"
-            "Gas cost couldn't be calculated automatically — please agree on a contribution directly. "
+            "Gas cost couldn't be calculated automatically — please agree on a contribution directly.\n\n"
             "Safe travels! 🚗"
         )
 
@@ -48,13 +48,20 @@ A driver ({driver_name}) and a passenger ({passenger_name}) just matched for a r
 - Driver covers: ${gas_data.get("driverCost")} (40% of gas)
 - Based on: $3.50/gal, 27 MPG average
 
-Write a short, warm welcome message (3-5 sentences) for their group chat.
-- Greet both by name
-- Clearly explain the gas split in plain English
-- Mention this chat will be deleted 2 hours after the pickup date
-- Keep it friendly and casual, like a helpful app assistant
-- Do NOT use markdown headers or bullet points — write as flowing sentences
-- End with an encouraging send-off"""
+Write a short, warm welcome message for their group chat. Use this exact structure — each item on its own line, separated by a blank line:
+
+1. A greeting line welcoming both by name and introducing the chat
+2. The matched route and date
+3. The gas cost breakdown (distance, price per gallon, MPG, total)
+4. Who pays what — passenger share and driver share — described as a 60/40 split
+5. A note that this chat will be deleted 2 hours after pickup
+6. A friendly send-off
+
+Rules:
+- Separate each item with a blank line (\\n\\n)
+- You may bold key values like names, locations, amounts using **bold**
+- Do NOT use bullet points, headers, or numbered lists in your output
+- Keep it friendly and casual, like a helpful app assistant"""
 
     if not GEMINI_API_KEY:
         return _fallback_message(from_location, to_location, ride_date, gas_data, driver_name, passenger_name)
@@ -80,12 +87,11 @@ Write a short, warm welcome message (3-5 sentences) for their group chat.
 
 
 def _fallback_message(from_loc, to_loc, ride_date, gas_data, driver_name, passenger_name) -> str:
-    return (
-        f"👋 Hey {passenger_name} and {driver_name}! Welcome to your Yugo ride chat. "
-        f"You're matched for the trip from **{from_loc}** to **{to_loc}** on {ride_date}. "
-        f"Based on {gas_data.get('distanceMiles')} miles at $3.50/gal (27 MPG avg), "
-        f"the total gas cost is **${gas_data.get('totalGasCost')}**. "
-        f"{passenger_name}, your share is **${gas_data.get('costPerPassenger')}** "
-        f"and {driver_name} covers **${gas_data.get('driverCost')}** — a 60/40 split. "
-        f"This chat will be removed 2 hours after your pickup. Safe travels! 🚗"
-    )
+    return "\n\n".join([
+        f"👋 Hey **{passenger_name}** and **{driver_name}**! Welcome to your Yugo ride chat.",
+        f"You're matched for the trip from **{from_loc}** to **{to_loc}** on {ride_date}.",
+        f"Based on {gas_data.get('distanceMiles')} miles at $3.50/gal (27 MPG avg), the total gas cost is **${gas_data.get('totalGasCost')}**.",
+        f"**{passenger_name}**, your share is **${gas_data.get('costPerPassenger')}** and {driver_name} covers **${gas_data.get('driverCost')}** — a 60/40 split.",
+        "This chat will be removed 2 hours after your pickup.",
+        "Safe travels! 🚗",
+    ])
