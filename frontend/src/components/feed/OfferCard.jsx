@@ -70,7 +70,6 @@ export default function OfferCard({ post, author, index = 0, onDelete }) {
         padding: "16px 18px",
         marginBottom: 10,
         boxShadow: "0 1px 4px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04)",
-        borderLeft: "3px solid var(--color-primary)",
         cursor: "pointer",
       }}
     >
