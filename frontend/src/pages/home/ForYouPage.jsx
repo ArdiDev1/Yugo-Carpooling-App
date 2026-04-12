@@ -3,6 +3,7 @@ import { useFeed } from "../../hooks/useFeed";
 import RequestCard from "../../components/feed/RequestCard";
 import OfferCard from "../../components/feed/OfferCard";
 import { SkeletonFeed } from "../../components/ui/Skeleton";
+import taxiIcon from "../../assets/taxi_icon.png";
 
 export default function ForYouPage() {
   const { posts, isLoading } = useFeed("forYou");
@@ -19,7 +20,7 @@ export default function ForYouPage() {
         transition={{ duration: 0.4 }}
         style={{ textAlign: "center", paddingTop: 80, color: "var(--color-muted)" }}
       >
-        <div style={{ fontSize: 48, marginBottom: 16, filter: "grayscale(0.3)" }}>&#128663;</div>
+        <img src={taxiIcon} alt="no rides" style={{ width: 48, height: 48, display: "block", margin: "0 auto 16px", objectFit: "contain" }} />
         <p style={{ fontSize: 16, fontWeight: 600, color: "var(--color-text)", marginBottom: 6 }}>No rides yet</p>
         <p style={{ fontSize: 13, color: "var(--color-muted)" }}>Be the first to post a ride!</p>
       </motion.div>

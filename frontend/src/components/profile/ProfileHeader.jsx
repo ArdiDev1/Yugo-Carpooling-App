@@ -2,6 +2,7 @@ import Avatar from "../ui/Avatar";
 import StarRating from "../ui/StarRating";
 import Badge from "../ui/Badge";
 import Button from "../ui/Button";
+import { UserPen } from "lucide-react";
 
 export default function ProfileHeader({ user, isOwnProfile = false, onEdit, onFollow, isFollowing = false, isMutualFollow = false, onGetNumber, copied = false }) {
   if (!user) return null;
@@ -24,7 +25,7 @@ export default function ProfileHeader({ user, isOwnProfile = false, onEdit, onFo
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
             {isOwnProfile ? (
-              <Button variant="ghost" size="sm" onClick={onEdit}>Edit</Button>
+              <Button variant="ghost" size="sm" onClick={onEdit}><UserPen size={16} /></Button>
             ) : (
               <Button
                 variant={isFollowing ? "ghost" : "primary"}

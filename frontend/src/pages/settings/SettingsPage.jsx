@@ -3,6 +3,7 @@ import { useAuth } from "../../hooks/useAuth";
 import PageHeader from "../../components/layout/PageHeader";
 import { ROUTES } from "../../constants/routes";
 import { useThemeStore } from "../../store/theme.store";
+import { UserPen, Lock, University, Bell, UserLock, Palette, Sun, Moon, MonitorCog, LogOut, Trash2 } from "lucide-react";
 
 function SettingsRow({ icon, label, onClick, danger = false, rightLabel, rightElement }) {
   return (
@@ -22,7 +23,7 @@ function SettingsRow({ icon, label, onClick, danger = false, rightLabel, rightEl
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <span style={{ fontSize: 20 }}>{icon}</span>
+        <span style={{ display: "flex", alignItems: "center", color: danger ? "#EF4444" : "var(--color-muted)" }}>{icon}</span>
         <span style={{ fontSize: 15, color: danger ? "#EF4444" : "var(--color-text)", fontWeight: 500 }}>{label}</span>
       </div>
       {rightElement ?? <span style={{ fontSize: 13, color: "var(--color-muted)" }}>{rightLabel ?? "›"}</span>}
@@ -31,9 +32,9 @@ function SettingsRow({ icon, label, onClick, danger = false, rightLabel, rightEl
 }
 
 const THEME_OPTIONS = [
-  { value: "light",  label: "Light",  emoji: "☀️" },
-  { value: "dark",   label: "Dark",   emoji: "🌙" },
-  { value: "system", label: "System", emoji: "⚙️" },
+  { value: "light",  label: "Light",  icon: <Sun  size={18} /> },
+  { value: "dark",   label: "Dark",   icon: <Moon size={18} /> },
+  { value: "system", label: "System", icon: <MonitorCog size={18} /> },
 ];
 
 function ThemeSelector() {
@@ -41,7 +42,7 @@ function ThemeSelector() {
 
   return (
     <div style={{ display: "flex", gap: 6, padding: "0 20px 14px" }}>
-      {THEME_OPTIONS.map(({ value, label, emoji }) => {
+      {THEME_OPTIONS.map(({ value, label, icon }) => {
         const active = preference === value;
         return (
           <button
@@ -60,7 +61,7 @@ function ThemeSelector() {
               gap:           3,
             }}
           >
-            <span style={{ fontSize: 18 }}>{emoji}</span>
+            {icon && <span style={{ display: "flex", color: active ? "var(--color-primary)" : "var(--color-muted)" }}>{icon}</span>}
             <span style={{ fontSize: 11, fontWeight: active ? 700 : 500, color: active ? "var(--color-primary)" : "var(--color-muted)" }}>
               {label}
             </span>
@@ -84,16 +85,16 @@ export default function SettingsPage() {
         <div style={{ padding: "16px 16px 4px" }}>
           <span style={{ fontSize: 12, fontWeight: 700, color: "var(--color-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Account</span>
         </div>
-        <SettingsRow icon="✏️"  label="Edit Profile"    onClick={() => navigate(ROUTES.EDIT_PROFILE)} />
-        <SettingsRow icon="🔒"  label="Change Password" onClick={() => {}} />
-        <SettingsRow icon="🏫"  label="School"          rightLabel={user?.school ?? ""} onClick={() => {}} />
+        <SettingsRow icon={<UserPen size={20} />}  label="Edit Profile"    onClick={() => navigate(ROUTES.EDIT_PROFILE)} />
+        <SettingsRow icon={<Lock       size={20} />}  label="Change Password" onClick={() => {}} />
+        <SettingsRow icon={<University size={20} />}  label="School"          rightLabel={user?.school ?? ""} onClick={() => {}} />
 
         {/* Preferences */}
         <div style={{ padding: "16px 16px 4px" }}>
           <span style={{ fontSize: 12, fontWeight: 700, color: "var(--color-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Preferences</span>
         </div>
-        <SettingsRow icon="🔔"  label="Notifications" onClick={() => {}} />
-        <SettingsRow icon="🔒"  label="Privacy"       onClick={() => {}} />
+        <SettingsRow icon={<Bell     size={20} />}  label="Notifications" onClick={() => {}} />
+        <SettingsRow icon={<UserLock size={20} />}  label="Privacy"       onClick={() => {}} />
 
         {/* Appearance */}
         <div style={{ padding: "16px 16px 8px" }}>
@@ -101,7 +102,7 @@ export default function SettingsPage() {
         </div>
         <div style={{ backgroundColor: "var(--color-surface)", borderBottom: "1px solid var(--color-border)", padding: "14px 20px 0" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-            <span style={{ fontSize: 20 }}>🎨</span>
+            <span style={{ display: "flex", color: "var(--color-muted)" }}><Palette size={20} /></span>
             <span style={{ fontSize: 15, fontWeight: 500, color: "var(--color-text)" }}>Theme</span>
           </div>
           <ThemeSelector />
@@ -111,8 +112,8 @@ export default function SettingsPage() {
         <div style={{ padding: "16px 16px 4px" }}>
           <span style={{ fontSize: 12, fontWeight: 700, color: "var(--color-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Account Actions</span>
         </div>
-        <SettingsRow icon="🚪"  label="Log Out"        onClick={logout} />
-        <SettingsRow icon="🗑️"  label="Delete Account" onClick={() => navigate(ROUTES.DELETE_ACCOUNT)} danger />
+        <SettingsRow icon={<LogOut size={20} />}  label="Log Out"        onClick={logout} />
+        <SettingsRow icon={<Trash2 size={20} />}  label="Delete Account" onClick={() => navigate(ROUTES.DELETE_ACCOUNT)} danger />
 
         <div style={{ padding: "20px 16px", textAlign: "center" }}>
           <span style={{ fontSize: 12, color: "var(--color-muted)" }}>Yugo v1.0.0</span>

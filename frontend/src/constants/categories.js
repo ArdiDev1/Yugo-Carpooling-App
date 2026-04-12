@@ -27,9 +27,10 @@ export const SEX_OPTIONS = [
 ];
 
 export const PAYMENT_METHODS = [
-  { value: "venmo",   label: "Venmo" },
   { value: "cash",    label: "Cash" },
+  { value: "venmo",   label: "Venmo" },
   { value: "zelle",   label: "Zelle" },
-  { value: "paypal",  label: "PayPal" },
   { value: "apple",   label: "Apple Pay" },
+  { value: "samsung", label: "Samsung Pay" },
+  { value: "paypal",  label: "PayPal" },
 ];

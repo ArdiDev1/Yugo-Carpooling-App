@@ -2,34 +2,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ROUTES } from "../../constants/routes";
 import { useChatStore } from "../../store/chat.store";
+import { MessageCircle, House, CircleUserRound } from "lucide-react";
 
 const CREAM = "#f8f7f2";
-
-function ChatIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={CREAM} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
-  );
-}
-
-function HomeIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={CREAM} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z" />
-      <polyline points="9 21 9 12 15 12 15 21" />
-    </svg>
-  );
-}
-
-function ProfileIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={CREAM} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
 
 function PlusIcon() {
   return (
@@ -132,7 +107,7 @@ export default function BottomBar() {
         {navBtn(
           () => navigate(ROUTES.MESSAGES),
           <div style={{ position: "relative" }}>
-            <ChatIcon />
+            <MessageCircle size={22} color={CREAM} />
             {unread > 0 && (
               <div style={{
                 position: "absolute", top: -4, right: -6,
@@ -151,14 +126,14 @@ export default function BottomBar() {
 
         {navBtn(
           () => navigate(ROUTES.HOME),
-          <HomeIcon />,
+          <House size={22} color={CREAM} />,
           "Home",
           isActive(ROUTES.HOME)
         )}
 
         {navBtn(
           () => navigate(ROUTES.MY_PROFILE),
-          <ProfileIcon />,
+          <CircleUserRound size={22} color={CREAM} />,
           "Profile",
           isActive(ROUTES.MY_PROFILE)
         )}

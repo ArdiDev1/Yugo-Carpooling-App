@@ -58,8 +58,7 @@ def verification_tokens_collection():
 
 async def _ensure_indexes() -> None:
     users = users_collection()
-    await users.create_index("email", unique=True)
-    await users.create_index("role")
+    await users.create_index([("email", 1), ("role", 1)], unique=True)
     await users.create_index("school")
 
     posts = posts_collection()
