@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Undo2 } from "lucide-react";
 import { useAuthStore } from "../../store/auth.store";
 import { userService } from "../../services/user.service";
 import { postService } from "../../services/post.service";
@@ -10,11 +11,38 @@ import VehicleCard from "../../components/profile/VehicleCard";
 import PaymentMethods from "../../components/profile/PaymentMethods";
 import RequestCard from "../../components/feed/RequestCard";
 import OfferCard from "../../components/feed/OfferCard";
-import PageHeader from "../../components/layout/PageHeader";
 import Spinner from "../../components/ui/Spinner";
+
+function BackButton({ onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        position:        "absolute",
+        top:             12,
+        left:            12,
+        zIndex:          10,
+        width:           34,
+        height:          34,
+        borderRadius:    "50%",
+        backgroundColor: "rgba(255,255,255,0.85)",
+        border:          "none",
+        cursor:          "pointer",
+        display:         "flex",
+        alignItems:      "center",
+        justifyContent:  "center",
+        boxShadow:       "0 2px 8px rgba(0,0,0,0.18)",
+        backdropFilter:  "blur(4px)",
+      }}
+    >
+      <Undo2 size={16} color="#07104e" strokeWidth={2.5} />
+    </button>
+  );
+}
 
 export default function UserProfilePage() {
   const { userId }    = useParams();
+  const navigate      = useNavigate();
   const currentUser   = useAuthStore((s) => s.user);
   const updateUser    = useAuthStore((s) => s.updateUser);
 
@@ -69,8 +97,10 @@ export default function UserProfilePage() {
 
   if (isLoading) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        <PageHeader title="Profile" showBack />
+      <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "#F7F7F8" }}>
+        <div style={{ position: "relative", height: 80, background: "linear-gradient(135deg, #6C47FF 0%, #a78bfa 100%)" }}>
+          <BackButton onClick={() => navigate(-1)} />
+        </div>
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Spinner />
         </div>
@@ -80,8 +110,10 @@ export default function UserProfilePage() {
 
   if (!profile) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        <PageHeader title="Profile" showBack />
+      <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "#F7F7F8" }}>
+        <div style={{ position: "relative", height: 80, background: "linear-gradient(135deg, #6C47FF 0%, #a78bfa 100%)" }}>
+          <BackButton onClick={() => navigate(-1)} />
+        </div>
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#9CA3AF" }}>
           User not found
         </div>
@@ -91,17 +123,21 @@ export default function UserProfilePage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "#F7F7F8" }}>
-      <PageHeader title={profile.username} showBack />
       <div style={{ flex: 1, overflowY: "auto" }}>
-        <ProfileHeader
-          user={profile}
-          isOwnProfile={false}
-          isFollowing={following}
-          onFollow={handleFollow}
-          isMutualFollow={isMutual}
-          onGetNumber={handleGetNumber}
-          copied={copied}
-        />
+
+        {/* ProfileHeader wrapped in relative so BackButton sits on the banner */}
+        <div style={{ position: "relative" }}>
+          <BackButton onClick={() => navigate(-1)} />
+          <ProfileHeader
+            user={profile}
+            isOwnProfile={false}
+            isFollowing={following}
+            onFollow={handleFollow}
+            isMutualFollow={isMutual}
+            onGetNumber={handleGetNumber}
+            copied={copied}
+          />
+        </div>
 
         {profile.role === "driver" && (
           <VehicleCard vehicle={profile.vehicle} isOwnProfile={false} />

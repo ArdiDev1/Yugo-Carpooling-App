@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Avatar from "../ui/Avatar";
-import Badge from "../ui/Badge";
 import RouteMap from "../map/RouteMap";
 import ConfirmInterestedDialog from "../ui/ConfirmInterestedDialog";
 import { messageService } from "../../services/message.service";
@@ -80,7 +79,10 @@ export default function OfferCard({ post, author, index = 0, onDelete }) {
     >
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div
+          style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}
+          onClick={(e) => { e.stopPropagation(); navigate(buildRoute.userProfile(author.id)); }}
+        >
           <Avatar name={author.name} src={author.avatarUrl} size="sm" showBadge />
           <div>
             <div style={{ fontSize: 14, fontWeight: 700, color: "var(--color-text)", letterSpacing: "-0.01em" }}>
@@ -91,7 +93,6 @@ export default function OfferCard({ post, author, index = 0, onDelete }) {
             </div>
           </div>
         </div>
-        <Badge variant={post.status === "open" ? "open" : "closed"} />
       </div>
 
       {/* Content */}

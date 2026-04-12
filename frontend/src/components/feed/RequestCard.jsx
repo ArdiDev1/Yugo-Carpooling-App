@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Avatar from "../ui/Avatar";
-import Badge from "../ui/Badge";
 import RouteMap from "../map/RouteMap";
 import { LUGGAGE_OPTIONS } from "../../constants/categories";
 import ConfirmInterestedDialog from "../ui/ConfirmInterestedDialog";
@@ -49,7 +48,8 @@ export default function RequestCard({ post, author, index = 0, onDelete }) {
   const handleConfirmInterest = async () => {
     setJoining(true);
     try {
-      const res = await messageService.createRoom(post.id, currentUser.id);
+      // Driver is current user; passenger is the request post's author.
+      const res = await messageService.createRoom(post.id, author.id, currentUser.id);
       setInterested(true);
       setShowDialog(false);
       setTimeout(() => navigate(buildRoute.chat(res.data.id)), 600);
@@ -78,14 +78,16 @@ export default function RequestCard({ post, author, index = 0, onDelete }) {
     >
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div
+          style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}
+          onClick={(e) => { e.stopPropagation(); navigate(buildRoute.userProfile(author.id)); }}
+        >
           <Avatar name={author.name} src={author.avatarUrl} size="sm" />
           <div>
             <div style={{ fontSize: 14, fontWeight: 700, color: "var(--color-text)", letterSpacing: "-0.01em" }}>{author.username}</div>
             <div style={{ fontSize: 11, color: "var(--color-muted)", fontWeight: 500 }}>{author.school}</div>
           </div>
         </div>
-        <Badge variant={post.status === "open" ? "open" : "closed"} />
       </div>
 
       {/* Content */}
@@ -150,11 +152,12 @@ export default function RequestCard({ post, author, index = 0, onDelete }) {
             whiteSpace: "nowrap",
           }}
         >
-          {interested ? "✓ Interested" : joining ? "..." : "Interested"}
+          {interested ? "✓ Matched" : joining ? "..." : "I'm in"}
         </button>
       </div>
 
       <ConfirmInterestedDialog
+        variant="driver"
         isOpen={showDialog}
         onClose={() => setShowDialog(false)}
         onConfirm={handleConfirmInterest}

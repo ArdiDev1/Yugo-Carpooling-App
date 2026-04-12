@@ -34,8 +34,9 @@ def _now():
 # ─────────────────────────────────────────────────────────────────
 
 class CreateRoomBody(BaseModel):
-    post_id: str      # the ride offer or request post
-    passenger_id: str # the passenger who clicked Interested
+    post_id:      str            # the ride offer or request post
+    passenger_id: str            # the passenger joining the ride
+    driver_id:    Optional[str] = None  # override driver; if None, derived from post.author_id
 
 
 class SendMessageBody(BaseModel):
@@ -86,7 +87,7 @@ async def create_room(body: CreateRoomBody, current_user=Depends(get_current_use
     if not post_doc:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    driver_id    = post_doc["author_id"]
+    driver_id    = body.driver_id or post_doc["author_id"]
     passenger_id = body.passenger_id
 
     # Prevent duplicate rooms for the same post + passenger pair
