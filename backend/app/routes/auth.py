@@ -75,9 +75,9 @@ def _doc_to_user(doc: dict) -> Union[Passenger, Driver]:
 async def signup(body: SignupBody):
     email = body.email.lower()
 
-    existing = await users_collection().find_one({"email": email})
+    existing = await users_collection().find_one({"email": email, "role": body.role})
     if existing:
-        raise HTTPException(status_code=409, detail="Email already registered")
+        raise HTTPException(status_code=409, detail=f"Email already registered as {body.role}")
 
     user_id = str(uuid.uuid4())
     prefix = "Dr" if body.role == "driver" else "Pa"
