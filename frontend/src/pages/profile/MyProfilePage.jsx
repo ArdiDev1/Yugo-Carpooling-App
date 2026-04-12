@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "../../store/auth.store";
 import { useAuth } from "../../hooks/useAuth";
 import { postService } from "../../services/post.service";
@@ -19,11 +19,18 @@ export default function MyProfilePage() {
   const user                 = useAuthStore((s) => s.user);
   const { isDriver, logout } = useAuth();
 
+  const queryClient = useQueryClient();
+
   const { data: myPosts = [] } = useQuery({
     queryKey: ["userPosts", user?.id],
     queryFn:  () => postService.getByUser(user.id).then((r) => r.data),
     enabled:  !!user?.id,
   });
+
+  const handleDelete = async (postId) => {
+    await postService.delete(postId);
+    queryClient.invalidateQueries({ queryKey: ["userPosts", user?.id] });
+  };
 
   if (!user) return null;
 
@@ -56,8 +63,8 @@ export default function MyProfilePage() {
             <h3 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: "0 0 8px 4px" }}>My Posts</h3>
             {myPosts.map((post) =>
               post.type === "request"
-                ? <RequestCard key={post.id} post={post} author={user} />
-                : <OfferCard   key={post.id} post={post} author={user} />
+                ? <RequestCard key={post.id} post={post} author={user} onDelete={handleDelete} />
+                : <OfferCard   key={post.id} post={post} author={user} onDelete={handleDelete} />
             )}
           </div>
         )}

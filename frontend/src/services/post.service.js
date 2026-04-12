@@ -11,4 +11,6 @@ export const postService = {
   delete:        (id)       => api.delete(`/posts/${id}`),
   like:          (id)       => api.post(`/posts/${id}/like`),
   unlike:        (id)       => api.delete(`/posts/${id}/like`),
+  estimateGas:   (origin, destination, passengers = 1) =>
+    api.get(`/posts/estimate-gas`, { params: { origin, destination, passengers } }),
 };

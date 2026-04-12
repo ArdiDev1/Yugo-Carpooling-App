@@ -22,6 +22,7 @@ class RideBase(BaseModel):
     school: Optional[str] = None
     likes: int = 0
     comments: int = 0
+    gas_cost: Optional[dict] = None
     created_at: datetime
 
 

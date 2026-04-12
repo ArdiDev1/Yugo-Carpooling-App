@@ -31,7 +31,7 @@ function formatTime(timeStr) {
 }
 
 
-export default function OfferCard({ post, author, index = 0 }) {
+export default function OfferCard({ post, author, index = 0, onDelete }) {
   if (!post || !author) return null;
 
   const [showDialog, setShowDialog] = useState(false);
@@ -79,7 +79,7 @@ export default function OfferCard({ post, author, index = 0 }) {
         </p>
       )}
 
-      {/* Route */}
+      {/* Route Map */}
       <div style={{ marginBottom: 12 }}>
         <RouteMap fromLocation={post.fromLocation} toLocation={post.toLocation} fromLabel="Pickup" toLabel="Dropoff" />
       </div>
@@ -134,6 +134,49 @@ export default function OfferCard({ post, author, index = 0 }) {
         </div>
       )}
 
+      {/* Gas Cost Estimate */}
+      {post.gasCost && !post.noPaymentNeeded && (
+        <div style={{
+          marginBottom: 12,
+          backgroundColor: "#FFF7ED",
+          borderRadius: 10,
+          padding: "10px 12px",
+          border: "1px solid #FED7AA",
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#C2410C" }}>&#9981; Gas Split</span>
+            <span style={{ fontSize: 11, color: "#9CA3AF" }}>
+              {post.gasCost.distanceMiles} mi
+            </span>
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <div style={{
+              flex: 1, textAlign: "center", backgroundColor: "#fff",
+              borderRadius: 8, padding: "8px 6px",
+              border: "1px solid #FED7AA",
+            }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: "#EA580C" }}>
+                ${post.gasCost.costPerPassenger.toFixed(2)}
+              </div>
+              <div style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 600, marginTop: 2 }}>per person</div>
+            </div>
+            <div style={{
+              flex: 1, textAlign: "center", backgroundColor: "#fff",
+              borderRadius: 8, padding: "8px 6px",
+              border: "1px solid #FED7AA",
+            }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: "#16A34A" }}>
+                ${post.gasCost.driverCost.toFixed(2)}
+              </div>
+              <div style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 600, marginTop: 2 }}>driver pays</div>
+            </div>
+          </div>
+          <div style={{ fontSize: 10, color: "#9CA3AF", textAlign: "center", marginTop: 6 }}>
+            Total ${post.gasCost.totalGasCost.toFixed(2)} · {post.gasCost.numPassengers} passenger{post.gasCost.numPassengers > 1 ? "s" : ""} · 60/40 split
+          </div>
+        </div>
+      )}
+
       {/* Tags + Interested button */}
       <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 8, marginTop: 4 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, flex: 1 }}>
@@ -178,6 +221,20 @@ export default function OfferCard({ post, author, index = 0 }) {
         date={formatDate(post.date)}
         time={post.flexible ? (post.flexibleWindow ?? "Flexible") : formatTime(post.time)}
       />
+
+      {onDelete && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onDelete(post.id); }}
+          style={{
+            width: "100%", marginTop: 10, padding: "10px 0",
+            borderRadius: 10, border: "1.5px solid #FCA5A5",
+            backgroundColor: "#FEF2F2", color: "#DC2626",
+            fontSize: 13, fontWeight: 700, cursor: "pointer",
+          }}
+        >
+          Cancel Ride
+        </button>
+      )}
 
     </motion.div>
   );

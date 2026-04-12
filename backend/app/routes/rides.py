@@ -6,6 +6,7 @@ from app.models.ride import RideOffer, RideRequest, PostCreate
 from app.auth.deps import get_current_user
 from app.db.mongo import rides_collection, users_collection
 from app.services.GeminiMatching import rank_feed
+from app.services.GasCost import estimate_ride_cost
 
 router = APIRouter()
 
@@ -135,6 +136,29 @@ async def get_posts_by_user(user_id: str, current_user=Depends(get_current_user)
 
 
 @router.get(
+    "/estimate-gas",
+    summary="Estimate gas cost",
+    description="Calculate the gas money split for a ride between two locations. "
+                "Uses Google Distance Matrix API for distance and a fixed formula: "
+                "$3.50/gal, 27 MPG avg, passengers cover 60% split evenly.",
+    responses={401: {"description": "Missing or invalid token"}},
+)
+async def estimate_gas(
+    origin: str,
+    destination: str,
+    passengers: int = 1,
+    _=Depends(get_current_user),
+):
+    result = await estimate_ride_cost(origin, destination, max(1, passengers))
+    if result is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Could not calculate distance. Check the addresses and try again.",
+        )
+    return result
+
+
+@router.get(
     "/{post_id}",
     summary="Get a post",
     description="Returns a single ride offer or request by its ID.",
@@ -180,6 +204,13 @@ async def create_post(body: PostCreate, current_user=Depends(get_current_user)):
 
     if body.type == "offer":
         doc["seats_taken"] = 0
+
+    # Calculate gas cost estimate if payment is expected
+    if not body_data.get("no_payment_needed"):
+        num_passengers = body_data.get("seats_total", 1)
+        gas = await estimate_ride_cost(body.from_location, body.to_location, num_passengers)
+        if gas:
+            doc["gas_cost"] = gas
 
     await rides_collection().insert_one(doc)
 
@@ -269,3 +300,5 @@ async def unlike_post(post_id: str, current_user=Depends(get_current_user)):
             {"$pull": {"liked_by": current_user.id}, "$inc": {"likes": -1}},
         )
     return {"ok": True}
+
+

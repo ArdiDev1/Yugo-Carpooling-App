@@ -32,7 +32,7 @@ function formatTime(timeStr) {
 }
 
 
-export default function RequestCard({ post, author, index = 0 }) {
+export default function RequestCard({ post, author, index = 0, onDelete }) {
   if (!post || !author) return null;
   const luggage = LUGGAGE_OPTIONS.find((o) => o.value === post.luggage);
 
@@ -73,7 +73,7 @@ export default function RequestCard({ post, author, index = 0 }) {
         </p>
       )}
 
-      {/* Route */}
+      {/* Route Map */}
       <div style={{ marginBottom: 12 }}>
         <RouteMap fromLocation={post.fromLocation} toLocation={post.toLocation} />
       </div>
@@ -139,6 +139,19 @@ export default function RequestCard({ post, author, index = 0 }) {
         time={post.flexible ? (post.flexibleWindow ?? "Flexible") : formatTime(post.time)}
       />
 
+      {onDelete && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onDelete(post.id); }}
+          style={{
+            width: "100%", marginTop: 10, padding: "10px 0",
+            borderRadius: 10, border: "1.5px solid #FCA5A5",
+            backgroundColor: "#FEF2F2", color: "#DC2626",
+            fontSize: 13, fontWeight: 700, cursor: "pointer",
+          }}
+        >
+          Cancel Request
+        </button>
+      )}
     </motion.div>
   );
 }
