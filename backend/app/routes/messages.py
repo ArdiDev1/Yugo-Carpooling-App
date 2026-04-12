@@ -34,9 +34,8 @@ def _now():
 # ─────────────────────────────────────────────────────────────────
 
 class CreateRoomBody(BaseModel):
-    post_id:      str            # the ride offer or request post
-    passenger_id: str            # the passenger joining the ride
-    driver_id:    Optional[str] = None  # override driver; if None, derived from post.author_id
+    post_id:      str  # the ride offer or request post
+    passenger_id: str  # the passenger joining the ride
 
 
 class SendMessageBody(BaseModel):
@@ -82,12 +81,15 @@ async def list_rooms(current_user=Depends(get_current_user)):
     status_code=201,
 )
 async def create_room(body: CreateRoomBody, current_user=Depends(get_current_user)):
+    if current_user.role != "driver":
+        raise HTTPException(status_code=403, detail="Only drivers can create chat rooms")
+
     # Load the post
     post_doc = await rides_collection().find_one({"_id": body.post_id})
     if not post_doc:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    driver_id    = body.driver_id or post_doc["author_id"]
+    driver_id    = current_user.id   # driver is always the one calling this
     passenger_id = body.passenger_id
 
     # Prevent duplicate rooms for the same post + passenger pair
@@ -170,6 +172,25 @@ async def create_room(body: CreateRoomBody, current_user=Depends(get_current_use
         "sent_at":   now,
     }
     await messages_collection().insert_one(gasbot_msg)
+
+    # ── Seat / post lifecycle ───────────────────────────────────
+    post_type = post_doc.get("type")
+
+    if post_type == "offer":
+        # Increment seats_taken; close/delete the post when fully booked.
+        new_taken = post_doc.get("seats_taken", 0) + 1
+        seats_total = post_doc.get("seats_total", 1)
+        if new_taken >= seats_total:
+            await rides_collection().delete_one({"_id": body.post_id})
+        else:
+            await rides_collection().update_one(
+                {"_id": body.post_id},
+                {"$set": {"seats_taken": new_taken}},
+            )
+
+    elif post_type == "request":
+        # Driver accepted — the passenger's request is fulfilled, delete it.
+        await rides_collection().delete_one({"_id": body.post_id})
 
     return _room_doc_to_dict(room_doc)
 

@@ -267,6 +267,27 @@ async def delete_post(post_id: str, current_user=Depends(get_current_user)):
 
 
 @router.post(
+    "/{post_id}/interest",
+    summary="Signal interest in a ride offer",
+    description="Passenger signals interest in a driver's offer. "
+                "Stores the passenger's ID in interested_by (idempotent). "
+                "Does NOT create a chat room — only the driver can do that.",
+    responses={401: {"description": "Missing or invalid token"}, 404: {"description": "Post not found"}},
+)
+async def signal_interest(post_id: str, current_user=Depends(get_current_user)):
+    if current_user.role != "passenger":
+        raise HTTPException(status_code=403, detail="Only passengers can signal interest")
+    doc = await rides_collection().find_one({"_id": post_id})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Post not found")
+    await rides_collection().update_one(
+        {"_id": post_id},
+        {"$addToSet": {"interested_by": current_user.id}},
+    )
+    return {"ok": True}
+
+
+@router.post(
     "/{post_id}/like",
     summary="Like a post",
     description="Adds the current user to the post's liked_by set (idempotent).",

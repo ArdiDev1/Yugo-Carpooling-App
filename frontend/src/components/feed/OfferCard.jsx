@@ -4,8 +4,7 @@ import { motion } from "framer-motion";
 import Avatar from "../ui/Avatar";
 import RouteMap from "../map/RouteMap";
 import ConfirmInterestedDialog from "../ui/ConfirmInterestedDialog";
-import { messageService } from "../../services/message.service";
-import { useAuthStore } from "../../store/auth.store";
+import { postService } from "../../services/post.service";
 import { buildRoute } from "../../constants/routes";
 
 function Pill({ children, color = "var(--color-muted)", bg = "var(--color-border)" }) {
@@ -37,21 +36,19 @@ function formatTime(timeStr) {
 export default function OfferCard({ post, author, index = 0, onDelete }) {
   if (!post || !author) return null;
 
-  const navigate   = useNavigate();
-  const currentUser = useAuthStore((s) => s.user);
+  const navigate = useNavigate();
   const [showDialog, setShowDialog] = useState(false);
   const [interested, setInterested]  = useState(false);
   const [joining,   setJoining]      = useState(false);
 
+  // Passenger signals interest — no chat created, just notifies the driver.
   const handleConfirmInterest = async () => {
     setJoining(true);
     try {
-      const res = await messageService.createRoom(post.id, currentUser.id);
+      await postService.signalInterest(post.id);
       setInterested(true);
       setShowDialog(false);
-      setTimeout(() => navigate(buildRoute.chat(res.data.id)), 600);
     } catch {
-      setInterested(true);
       setShowDialog(false);
     } finally {
       setJoining(false);

@@ -6,7 +6,6 @@ import RouteMap from "../map/RouteMap";
 import { LUGGAGE_OPTIONS } from "../../constants/categories";
 import ConfirmInterestedDialog from "../ui/ConfirmInterestedDialog";
 import { messageService } from "../../services/message.service";
-import { useAuthStore } from "../../store/auth.store";
 import { buildRoute } from "../../constants/routes";
 
 function Pill({ children, color = "var(--color-muted)", bg = "var(--color-border)" }) {
@@ -39,17 +38,17 @@ export default function RequestCard({ post, author, index = 0, onDelete }) {
   if (!post || !author) return null;
   const luggage = LUGGAGE_OPTIONS.find((o) => o.value === post.luggage);
 
-  const navigate    = useNavigate();
-  const currentUser = useAuthStore((s) => s.user);
+  const navigate = useNavigate();
   const [showDialog, setShowDialog] = useState(false);
   const [interested, setInterested]  = useState(false);
   const [joining,   setJoining]      = useState(false);
 
+  // Driver accepts — creates the group chat with the passenger (post author).
   const handleConfirmInterest = async () => {
     setJoining(true);
     try {
-      // Driver is current user; passenger is the request post's author.
-      const res = await messageService.createRoom(post.id, author.id, currentUser.id);
+      // Driver is current_user (from JWT); passenger is the request post's author.
+      const res = await messageService.createRoom(post.id, post.authorId ?? author.id);
       setInterested(true);
       setShowDialog(false);
       setTimeout(() => navigate(buildRoute.chat(res.data.id)), 600);

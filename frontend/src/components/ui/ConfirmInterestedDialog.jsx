@@ -6,9 +6,9 @@ import questioningIcon from "../../assets/questioning_icon.png";
 export default function ConfirmInterestedDialog({ isOpen, onClose, onConfirm, date, time, variant = "passenger" }) {
   if (!isOpen) return null;
 
-  const isDriver     = variant === "driver";
-  const title        = isDriver ? "Accept this passenger?" : "Can you make it?";
-  const body         = isDriver
+  const isDriver = variant === "driver";
+  const title    = isDriver ? "Accept this passenger?" : "Can you make it?";
+  const body     = isDriver
     ? "This will create a group chat between you and the passenger. Gas details will be shared automatically."
     : "Confirm that you're interested and available for this ride.";
   const confirmLabel = isDriver ? "Open chat" : "I'm in!";

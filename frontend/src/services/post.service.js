@@ -9,8 +9,9 @@ export const postService = {
   update:        (id, data) => api.patch(`/posts/${id}`, data),
   close:         (id)       => api.patch(`/posts/${id}`, { status: "closed" }),
   delete:        (id)       => api.delete(`/posts/${id}`),
-  like:          (id)       => api.post(`/posts/${id}/like`),
-  unlike:        (id)       => api.delete(`/posts/${id}/like`),
+  like:           (id)      => api.post(`/posts/${id}/like`),
+  unlike:         (id)      => api.delete(`/posts/${id}/like`),
+  signalInterest: (id)      => api.post(`/posts/${id}/interest`),
   estimateGas:   (origin, destination, passengers = 1) =>
     api.get(`/posts/estimate-gas`, { params: { origin, destination, passengers } }),
 };
