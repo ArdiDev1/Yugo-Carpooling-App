@@ -1,22 +1,26 @@
+import { createPortal } from "react-dom";
+
 export default function ConfirmInterestedDialog({ isOpen, onClose, onConfirm, date, time }) {
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
         onClick={onClose}
+        onPointerDown={(e) => e.stopPropagation()}
         style={{
           position:        "fixed",
           inset:           0,
           backgroundColor: "rgba(0,0,0,0.5)",
-          zIndex:          1000,
+          zIndex:          2000,
           animation:       "fadeIn 0.18s ease",
         }}
       />
 
       {/* Dialog */}
       <div
+        onPointerDown={(e) => e.stopPropagation()}
         style={{
           position:        "fixed",
           top:             "50%",
@@ -25,7 +29,7 @@ export default function ConfirmInterestedDialog({ isOpen, onClose, onConfirm, da
           backgroundColor: "#fff",
           borderRadius:    20,
           padding:         "28px 24px 20px",
-          zIndex:          1001,
+          zIndex:          2001,
           width:           "min(320px, 88vw)",
           boxShadow:       "0 24px 64px rgba(0,0,0,0.22)",
           textAlign:       "center",
@@ -92,6 +96,7 @@ export default function ConfirmInterestedDialog({ isOpen, onClose, onConfirm, da
           </button>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }

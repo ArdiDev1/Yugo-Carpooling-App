@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Avatar from "../ui/Avatar";
 import Badge from "../ui/Badge";
-import PostActions from "./PostActions";
+import RouteMap from "../map/RouteMap";
 import { LUGGAGE_OPTIONS } from "../../constants/categories";
+import ConfirmInterestedDialog from "../ui/ConfirmInterestedDialog";
 
 function Pill({ children, color = "var(--color-muted)", bg = "var(--color-border)" }) {
   return (
@@ -29,33 +31,13 @@ function formatTime(timeStr) {
   return `${((h % 12) || 12)}:${String(m).padStart(2, "0")} ${suffix}`;
 }
 
-function RouteIndicator({ from, to }) {
-  return (
-    <div style={{ display: "flex", gap: 10, alignItems: "stretch" }}>
-      {/* Dot-line-dot */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 3, paddingBottom: 3 }}>
-        <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "var(--color-primary)", flexShrink: 0 }} />
-        <div style={{ flex: 1, width: 2, background: "linear-gradient(to bottom, var(--color-primary), var(--color-secondary))", borderRadius: 1, margin: "3px 0" }} />
-        <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "var(--color-secondary)", flexShrink: 0 }} />
-      </div>
-      {/* Labels */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 6, minHeight: 48 }}>
-        <div>
-          <div style={{ fontSize: 11, color: "var(--color-muted)", fontWeight: 500, marginBottom: 1 }}>From</div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text)", lineHeight: 1.3 }}>{from}</div>
-        </div>
-        <div>
-          <div style={{ fontSize: 11, color: "var(--color-muted)", fontWeight: 500, marginBottom: 1 }}>To</div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text)", lineHeight: 1.3 }}>{to}</div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function RequestCard({ post, author, index = 0 }) {
   if (!post || !author) return null;
   const luggage = LUGGAGE_OPTIONS.find((o) => o.value === post.luggage);
+
+  const [showDialog, setShowDialog] = useState(false);
+  const [interested, setInterested]  = useState(false);
 
   return (
     <motion.div
@@ -93,7 +75,7 @@ export default function RequestCard({ post, author, index = 0 }) {
 
       {/* Route */}
       <div style={{ marginBottom: 12 }}>
-        <RouteIndicator from={post.fromLocation} to={post.toLocation} />
+        <RouteMap fromLocation={post.fromLocation} toLocation={post.toLocation} />
       </div>
 
       {/* Time & Date row */}
@@ -118,21 +100,45 @@ export default function RequestCard({ post, author, index = 0 }) {
         </div>
       </div>
 
-      {/* Tags */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-        {post.prefersWomen && <Pill bg="#FFF0F6" color="#DB2777">Women preferred</Pill>}
-        <Pill bg={post.flexible ? "#ECFDF5" : "#FEF9C3"} color={post.flexible ? "#065F46" : "#92400E"}>
-          {post.flexible ? "Flexible time" : "Exact time"}
-        </Pill>
-        {luggage && <Pill>{luggage.emoji} {luggage.label}</Pill>}
+      {/* Tags + Interested button */}
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 8, marginTop: 4 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, flex: 1 }}>
+          {post.prefersWomen && <Pill bg="#FFF0F6" color="#DB2777">Women preferred</Pill>}
+          <Pill bg={post.flexible ? "#ECFDF5" : "#FEF9C3"} color={post.flexible ? "#065F46" : "#92400E"}>
+            {post.flexible ? "Flexible time" : "Exact time"}
+          </Pill>
+          {luggage && <Pill>{luggage.emoji} {luggage.label}</Pill>}
+        </div>
+
+        <button
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => { e.stopPropagation(); if (!interested) setShowDialog(true); }}
+          style={{
+            flexShrink: 0,
+            padding: "6px 14px",
+            borderRadius: 999,
+            border: interested ? "1.5px solid #16A34A" : "1.5px solid var(--color-border)",
+            backgroundColor: interested ? "#DCFCE7" : "transparent",
+            color: interested ? "#15803D" : "var(--color-muted)",
+            fontSize: 12,
+            fontWeight: 700,
+            cursor: interested ? "default" : "pointer",
+            transition: "all 0.2s",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {interested ? "✓ Interested" : "Interested"}
+        </button>
       </div>
 
-      <PostActions
-        postId={post.id}
-        likes={post.likes ?? 0}
-        comments={post.comments ?? 0}
-        isLikedByMe={post.isLikedByMe ?? false}
+      <ConfirmInterestedDialog
+        isOpen={showDialog}
+        onClose={() => setShowDialog(false)}
+        onConfirm={() => { setInterested(true); setShowDialog(false); }}
+        date={formatDate(post.date)}
+        time={post.flexible ? (post.flexibleWindow ?? "Flexible") : formatTime(post.time)}
       />
+
     </motion.div>
   );
 }
