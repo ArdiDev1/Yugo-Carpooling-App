@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import auth, users, rides
+from app.routes import auth, users, rides, messages
 from app.routes.map import router as map_router
 from app.db.mongo import connect_to_mongo, close_mongo_connection
 
@@ -30,6 +30,10 @@ tags_metadata = [
         "name": "Posts",
         "description": "Create and browse ride offers (drivers) and ride requests (passengers).",
     },
+    {
+        "name": "Messages",
+        "description": "Group chat rooms created when a passenger matches with a driver.",
+    },
 ]
 
 app = FastAPI(
@@ -51,7 +55,8 @@ app.add_middleware(
 app.include_router(auth.router,   prefix="/api/v1/auth",  tags=["Auth"])
 app.include_router(users.router,  prefix="/api/v1/users", tags=["Users"])
 app.include_router(rides.router,  prefix="/api/v1/posts", tags=["Posts"])
-app.include_router(map_router,    prefix="/api/v1/map",   tags=["Map"])
+app.include_router(map_router,          prefix="/api/v1/map",      tags=["Map"])
+app.include_router(messages.router,     prefix="/api/v1/messages",  tags=["Messages"])
 
 
 @app.get("/", tags=["Health"])

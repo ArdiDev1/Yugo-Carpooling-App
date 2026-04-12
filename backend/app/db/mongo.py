@@ -60,6 +60,14 @@ def rides_collection():
     return get_db()["rides"]
 
 
+def rooms_collection():
+    return get_db()["rooms"]
+
+
+def messages_collection():
+    return get_db()["messages"]
+
+
 async def _ensure_indexes() -> None:
     users = users_collection()
     await users.create_index([("email", 1), ("role", 1)], unique=True)
@@ -84,3 +92,13 @@ async def _ensure_indexes() -> None:
     await rides.create_index("type")
     await rides.create_index("date")
     await rides.create_index("school")
+
+    rooms = rooms_collection()
+    await rooms.create_index("participants")
+    await rooms.create_index("post_id")
+    await rooms.create_index("last_message_at")
+    await rooms.create_index("expires_at", expireAfterSeconds=0)  # TTL auto-delete
+
+    msgs = messages_collection()
+    await msgs.create_index("room_id")
+    await msgs.create_index([("room_id", 1), ("sent_at", 1)])

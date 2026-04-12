@@ -1,76 +1,115 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useAuthStore } from "../../store/auth.store";
-import { useChatStore } from "../../store/chat.store";
-import { getUserById } from "../../mocks/users";
-import { MOCK_MESSAGES, MOCK_ROOMS } from "../../mocks/messages";
+import { messageService } from "../../services/message.service";
 import ChatBubble from "../../components/messages/ChatBubble";
 import GasBotMessage from "../../components/messages/GasBotMessage";
 import PageHeader from "../../components/layout/PageHeader";
 
-const USE_MOCK = true;
+function normalizeMessage(doc) {
+  return {
+    id:       doc.id,
+    roomId:   doc.room_id,
+    senderId: doc.sender_id,
+    text:     doc.text,
+    isGasBot: doc.is_gasbot ?? false,
+    gasData:  doc.gas_data ?? null,
+    sentAt:   doc.sent_at,
+  };
+}
 
 export default function ChatRoomPage() {
   const { roomId }  = useParams();
   const user        = useAuthStore((s) => s.user);
-  const { messages, setMessages, addMessage, markRoomRead } = useChatStore();
-  const [text, setText]     = useState("");
-  const [copied, setCopied] = useState(false);
-  const bottomRef           = useRef(null);
+  const [messages, setMessages] = useState([]);
+  const [room, setRoom]         = useState(null);
+  const [text, setText]         = useState("");
+  const [sending, setSending]   = useState(false);
+  const [copied, setCopied]     = useState(false);
+  const bottomRef               = useRef(null);
+
+  const loadMessages = useCallback(() => {
+    messageService.getMessages(roomId)
+      .then((res) => setMessages((res.data ?? []).map(normalizeMessage)))
+      .catch(() => {});
+  }, [roomId]);
+
+  // Load room info from rooms list
+  useEffect(() => {
+    messageService.getRooms()
+      .then((res) => {
+        const found = (res.data ?? []).find((r) => r.id === roomId);
+        if (found) setRoom(found);
+      })
+      .catch(() => {});
+  }, [roomId]);
+
+  useEffect(() => {
+    loadMessages();
+  }, [loadMessages]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages.length]);
+
+  // Poll for new messages every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(loadMessages, 5000);
+    return () => clearInterval(interval);
+  }, [loadMessages]);
+
+  const otherId   = room?.participants?.find((id) => id !== user?.id);
+  const otherName = room?.names?.[otherId] ?? "Chat";
 
   const handleCopyPhone = () => {
-    if (!otherUser?.phone) return;
-    navigator.clipboard.writeText(otherUser.phone).then(() => {
+    const phone = room?.phone;
+    if (!phone) return;
+    navigator.clipboard.writeText(phone).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
   };
 
-  const room     = MOCK_ROOMS.find((r) => r.id === roomId);
-  const otherId  = room?.participants.find((id) => id !== user?.id);
-  const otherUser = getUserById(otherId ?? "");
-
-  useEffect(() => {
-    if (USE_MOCK && MOCK_MESSAGES[roomId]) {
-      setMessages(roomId, MOCK_MESSAGES[roomId]);
-    }
-    markRoomRead(roomId);
-  }, [roomId, setMessages, markRoomRead]);
-
-  // Auto-scroll to bottom
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages[roomId]?.length]);
-
-  const roomMessages = messages[roomId] ?? [];
-
-  const handleSend = () => {
-    if (!text.trim()) return;
-    const msg = {
-      id:        `m-${Date.now()}`,
+  const handleSend = async () => {
+    if (!text.trim() || sending) return;
+    const optimistic = {
+      id:       `opt-${Date.now()}`,
       roomId,
-      senderId:  user?.id ?? "u1",
-      text:      text.trim(),
-      sentAt:    new Date().toISOString(),
-      isGasBot:  false,
+      senderId: user?.id,
+      text:     text.trim(),
+      isGasBot: false,
+      gasData:  null,
+      sentAt:   new Date().toISOString(),
     };
-    addMessage(roomId, msg);
+    setMessages((prev) => [...prev, optimistic]);
     setText("");
+    setSending(true);
+    try {
+      await messageService.send(roomId, optimistic.text);
+      // Refresh to get server-side message with real id
+      loadMessages();
+    } catch {
+      // Remove optimistic message on failure
+      setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
+      setText(optimistic.text);
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleKey = (e) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
-  // Track first message in each sender-run for avatar display
   let prevSender = null;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "#F7F7F8" }}>
       <PageHeader
-        title={otherUser?.username ?? "Chat"}
+        title={otherName}
         showBack
-        rightAction={otherUser?.phone ? (
+        rightAction={room?.phone ? (
           <button
             onClick={handleCopyPhone}
             title={copied ? "Copied!" : "Copy phone number"}
@@ -102,29 +141,39 @@ export default function ChatRoomPage() {
       />
 
       {/* Ride summary chip */}
-      {room?.postSummary && (
+      {room?.post_summary && (
         <div style={{ padding: "6px 16px", backgroundColor: "#EDE8FF" }}>
-          <span style={{ fontSize: 12, color: "#6C47FF", fontWeight: 600 }}>🚗 {room.postSummary}</span>
+          <span style={{ fontSize: 12, color: "#6C47FF", fontWeight: 600 }}>🚗 {room.post_summary}</span>
         </div>
       )}
 
       {/* Messages */}
       <div style={{ flex: 1, overflowY: "auto", paddingTop: 8, paddingBottom: 8 }}>
-        {roomMessages.map((msg) => {
+        {messages.map((msg) => {
           if (msg.isGasBot) {
             prevSender = "gasbot";
-            return <GasBotMessage key={msg.id} gasData={msg.gasData} />;
+            return (
+              <div key={msg.id} style={{ margin: "10px 12px", padding: "12px 14px", backgroundColor: "#EDE8FF", borderRadius: 12, border: "1.5px solid #6C47FF" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                  <span style={{ fontSize: 18 }}>🤖</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#6C47FF" }}>GasBot</span>
+                </div>
+                <div style={{ fontSize: 13, color: "#4C1D95", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+                  {msg.text}
+                </div>
+              </div>
+            );
           }
           const isOwn      = msg.senderId === user?.id;
           const showAvatar = !isOwn && msg.senderId !== prevSender;
           prevSender = msg.senderId;
-          const sender     = getUserById(msg.senderId);
+          const senderName = room?.names?.[msg.senderId] ?? "";
           return (
             <ChatBubble
               key={msg.id}
               message={msg}
               isOwnMessage={isOwn}
-              senderName={sender?.name ?? ""}
+              senderName={senderName}
               showAvatar={showAvatar}
             />
           );
@@ -160,14 +209,14 @@ export default function ChatRoomPage() {
         />
         <button
           onClick={handleSend}
-          disabled={!text.trim()}
+          disabled={!text.trim() || sending}
           style={{
             width:           36,
             height:          36,
             borderRadius:    "50%",
-            backgroundColor: text.trim() ? "#6C47FF" : "#E5E7EB",
+            backgroundColor: text.trim() && !sending ? "#6C47FF" : "#E5E7EB",
             border:          "none",
-            cursor:          text.trim() ? "pointer" : "default",
+            cursor:          text.trim() && !sending ? "pointer" : "default",
             display:         "flex",
             alignItems:      "center",
             justifyContent:  "center",

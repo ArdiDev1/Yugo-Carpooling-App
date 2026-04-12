@@ -1,9 +1,13 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Avatar from "../ui/Avatar";
 import Badge from "../ui/Badge";
 import RouteMap from "../map/RouteMap";
 import ConfirmInterestedDialog from "../ui/ConfirmInterestedDialog";
+import { messageService } from "../../services/message.service";
+import { useAuthStore } from "../../store/auth.store";
+import { buildRoute } from "../../constants/routes";
 
 function Pill({ children, color = "var(--color-muted)", bg = "var(--color-border)" }) {
   return (
@@ -34,8 +38,25 @@ function formatTime(timeStr) {
 export default function OfferCard({ post, author, index = 0, onDelete }) {
   if (!post || !author) return null;
 
+  const navigate   = useNavigate();
+  const currentUser = useAuthStore((s) => s.user);
   const [showDialog, setShowDialog] = useState(false);
   const [interested, setInterested]  = useState(false);
+  const [joining,   setJoining]      = useState(false);
+
+  const handleConfirmInterest = async () => {
+    setJoining(true);
+    try {
+      const res = await messageService.createRoom(post.id, currentUser.id);
+      setInterested(true);
+      setShowDialog(false);
+      navigate(buildRoute.chat(res.data.id));
+    } catch {
+      setShowDialog(false);
+    } finally {
+      setJoining(false);
+    }
+  };
 
   const seatsLeft = (post.seatsTotal ?? 0) - (post.seatsTaken ?? 0);
   const pct = ((post.seatsTaken ?? 0) / (post.seatsTotal || 1)) * 100;
@@ -195,29 +216,30 @@ export default function OfferCard({ post, author, index = 0, onDelete }) {
 
         <button
           onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => { e.stopPropagation(); if (!interested) setShowDialog(true); }}
+          onClick={(e) => { e.stopPropagation(); if (!interested && !joining) setShowDialog(true); }}
+          disabled={joining}
           style={{
             flexShrink: 0,
             padding: "6px 14px",
             borderRadius: 999,
             border: interested ? "1.5px solid #16A34A" : "1.5px solid var(--color-border)",
-            backgroundColor: interested ? "#DCFCE7" : "transparent",
-            color: interested ? "#15803D" : "var(--color-muted)",
+            backgroundColor: interested ? "#DCFCE7" : joining ? "#F3F4F6" : "transparent",
+            color: interested ? "#15803D" : joining ? "#9CA3AF" : "var(--color-muted)",
             fontSize: 12,
             fontWeight: 700,
-            cursor: interested ? "default" : "pointer",
+            cursor: (interested || joining) ? "default" : "pointer",
             transition: "all 0.2s",
             whiteSpace: "nowrap",
           }}
         >
-          {interested ? "✓ Interested" : "Interested"}
+          {interested ? "✓ Interested" : joining ? "..." : "Interested"}
         </button>
       </div>
 
       <ConfirmInterestedDialog
         isOpen={showDialog}
         onClose={() => setShowDialog(false)}
-        onConfirm={() => { setInterested(true); setShowDialog(false); }}
+        onConfirm={handleConfirmInterest}
         date={formatDate(post.date)}
         time={post.flexible ? (post.flexibleWindow ?? "Flexible") : formatTime(post.time)}
       />
