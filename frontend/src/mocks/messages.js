@@ -7,7 +7,7 @@ export const MOCK_ROOMS = [
     participants: ["u1", "u3"],
     lastMessage: "See you at 8am, meet by the flagpole!",
     lastMessageAt: "2026-04-10T19:45:00Z",
-    unreadCount: 1,
+    unreadCount: 0,
   },
   {
     id: "room2",

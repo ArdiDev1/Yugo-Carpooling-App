@@ -3,7 +3,7 @@ import { useAuth } from "../../hooks/useAuth";
 import PageHeader from "../../components/layout/PageHeader";
 import { ROUTES } from "../../constants/routes";
 import { useThemeStore } from "../../store/theme.store";
-import { PencilLine, Lock, University, Bell, UserLock, Palette, Sun, Moon, MonitorCog, LogOut, Trash2 } from "lucide-react";
+import { UserPen, Lock, University, Bell, UserLock, Palette, Sun, Moon, MonitorCog, LogOut, Trash2 } from "lucide-react";
 
 function SettingsRow({ icon, label, onClick, danger = false, rightLabel, rightElement }) {
   return (
@@ -85,7 +85,7 @@ export default function SettingsPage() {
         <div style={{ padding: "16px 16px 4px" }}>
           <span style={{ fontSize: 12, fontWeight: 700, color: "var(--color-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Account</span>
         </div>
-        <SettingsRow icon={<PencilLine size={20} />}  label="Edit Profile"    onClick={() => navigate(ROUTES.EDIT_PROFILE)} />
+        <SettingsRow icon={<UserPen size={20} />}  label="Edit Profile"    onClick={() => navigate(ROUTES.EDIT_PROFILE)} />
         <SettingsRow icon={<Lock       size={20} />}  label="Change Password" onClick={() => {}} />
         <SettingsRow icon={<University size={20} />}  label="School"          rightLabel={user?.school ?? ""} onClick={() => {}} />
 

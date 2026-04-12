@@ -25,6 +25,8 @@ import { useNavigate } from "react-router-dom";
 import Modal from "../../components/ui/Modal";
 import { useAuth } from "../../hooks/useAuth";
 import { ROUTES } from "../../constants/routes";
+import raiseHandIcon from "../../assets/raise_hand_icon.png";
+import acceptHandIcon from "../../assets/accept_hand_icon.png";
 
 export default function CreatePage() {
   const navigate     = useNavigate();
@@ -67,7 +69,7 @@ export default function CreatePage() {
             width:           "100%",
           }}
         >
-          <span style={{ fontSize: 36 }}>🙋</span>
+          <img src={raiseHandIcon} alt="request" style={{ width: 36, height: 36, objectFit: "contain" }} />
           <div>
             <div style={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>
               Request a Ride
@@ -98,7 +100,7 @@ export default function CreatePage() {
             width:           "100%",
           }}
         >
-          <span style={{ fontSize: 36 }}>🚗</span>
+          <img src={acceptHandIcon} alt="offer" style={{ width: 36, height: 36, objectFit: "contain" }} />
           <div>
             <div style={{ fontSize: 16, fontWeight: 700, color: isDriver ? "#111827" : "#9CA3AF" }}>
               Offer a Ride
