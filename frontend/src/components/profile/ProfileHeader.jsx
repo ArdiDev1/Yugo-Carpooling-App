@@ -3,7 +3,7 @@ import StarRating from "../ui/StarRating";
 import Badge from "../ui/Badge";
 import Button from "../ui/Button";
 
-export default function ProfileHeader({ user, isOwnProfile = false, onEdit, onFollow, isFollowing = false }) {
+export default function ProfileHeader({ user, isOwnProfile = false, onEdit, onFollow, isFollowing = false, isMutualFollow = false, onGetNumber, copied = false }) {
   if (!user) return null;
   return (
     <div style={{ backgroundColor: "#fff", marginBottom: 8 }}>
@@ -22,17 +22,44 @@ export default function ProfileHeader({ user, isOwnProfile = false, onEdit, onFo
             <div style={{ fontSize: 13, color: "#6B7280" }}>@{user.username} · {user.pronouns}</div>
             <div style={{ fontSize: 13, color: "#6B7280" }}>{user.school}</div>
           </div>
-          {isOwnProfile ? (
-            <Button variant="ghost" size="sm" onClick={onEdit}>Edit</Button>
-          ) : (
-            <Button
-              variant={isFollowing ? "ghost" : "primary"}
-              size="sm"
-              onClick={onFollow}
-            >
-              {isFollowing ? "Following" : "Follow"}
-            </Button>
-          )}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+            {isOwnProfile ? (
+              <Button variant="ghost" size="sm" onClick={onEdit}>Edit</Button>
+            ) : (
+              <Button
+                variant={isFollowing ? "ghost" : "primary"}
+                size="sm"
+                onClick={onFollow}
+              >
+                {isFollowing ? "Following" : "Follow"}
+              </Button>
+            )}
+            {!isOwnProfile && isMutualFollow && (
+              <button
+                onClick={onGetNumber}
+                style={{
+                  display:         "flex",
+                  alignItems:      "center",
+                  gap:             5,
+                  background:      copied ? "#16A34A" : "#07104e",
+                  color:           "#f8f7f2",
+                  border:          "none",
+                  borderRadius:    20,
+                  padding:         "5px 12px",
+                  fontSize:        12,
+                  fontWeight:      600,
+                  cursor:          "pointer",
+                  transition:      "background 0.2s",
+                  whiteSpace:      "nowrap",
+                }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f8f7f2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6 6l.94-.94a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.73 16z" />
+                </svg>
+                {copied ? "Copied!" : "Get number"}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Rating */}

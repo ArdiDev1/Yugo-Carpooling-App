@@ -40,7 +40,7 @@ export default function EmailVerificationPage() {
           <Input
             label="Verification Code"
             name="code"
-            placeholder="Enter 6-digit code"
+            placeholder="Enter 4-digit code"
             value={code}
             onChange={(e) => setCode(e.target.value)}
             error={error}

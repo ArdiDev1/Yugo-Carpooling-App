@@ -121,7 +121,7 @@ def logout():
 @router.post(
     "/verify-email",
     summary="Verify school email",
-    description="Submit the 6-digit code sent to the user's school email address.",
+    description="Submit the 4-digit code sent to the user's school email address.",
     responses={400: {"description": "Invalid or expired code"}},
 )
 def verify_email(body: dict):

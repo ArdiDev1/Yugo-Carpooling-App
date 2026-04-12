@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useAuthStore } from "../../store/auth.store";
 import { getUserById, MOCK_USERS } from "../../mocks/users";
@@ -17,6 +17,17 @@ export default function UserProfilePage() {
   const [following, setFollowing] = useState(
     currentUser?.following?.includes(userId) ?? false
   );
+  const [copied, setCopied] = useState(false);
+
+  const isMutual = following && (profile?.following?.includes(currentUser?.id) ?? false);
+
+  const handleGetNumber = useCallback(() => {
+    if (!profile?.phone) return;
+    navigator.clipboard.writeText(profile.phone).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [profile?.phone]);
 
   if (!profile) {
     return (
@@ -40,6 +51,9 @@ export default function UserProfilePage() {
           isOwnProfile={false}
           isFollowing={following}
           onFollow={() => setFollowing((v) => !v)}
+          isMutualFollow={isMutual}
+          onGetNumber={handleGetNumber}
+          copied={copied}
         />
 
         {profile.role === "driver" && (

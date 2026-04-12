@@ -15,7 +15,16 @@ export default function ChatRoomPage() {
   const user        = useAuthStore((s) => s.user);
   const { messages, setMessages, addMessage, markRoomRead } = useChatStore();
   const [text, setText]     = useState("");
+  const [copied, setCopied] = useState(false);
   const bottomRef           = useRef(null);
+
+  const handleCopyPhone = () => {
+    if (!otherUser?.phone) return;
+    navigator.clipboard.writeText(otherUser.phone).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   const room     = MOCK_ROOMS.find((r) => r.id === roomId);
   const otherId  = room?.participants.find((id) => id !== user?.id);
@@ -58,7 +67,39 @@ export default function ChatRoomPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "#F7F7F8" }}>
-      <PageHeader title={otherUser?.username ?? "Chat"} showBack />
+      <PageHeader
+        title={otherUser?.username ?? "Chat"}
+        showBack
+        rightAction={otherUser?.phone ? (
+          <button
+            onClick={handleCopyPhone}
+            title={copied ? "Copied!" : "Copy phone number"}
+            style={{
+              background:     copied ? "#16A34A" : "rgba(255,255,255,0.12)",
+              border:         "none",
+              borderRadius:   "50%",
+              width:          32,
+              height:         32,
+              cursor:         "pointer",
+              display:        "flex",
+              alignItems:     "center",
+              justifyContent: "center",
+              transition:     "background 0.2s",
+              flexShrink:     0,
+            }}
+          >
+            {copied ? (
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f8f7f2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            ) : (
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f8f7f2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6 6l.94-.94a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.73 16z" />
+              </svg>
+            )}
+          </button>
+        ) : null}
+      />
 
       {/* Ride summary chip */}
       {room?.postSummary && (
