@@ -1,4 +1,5 @@
 import { createPortal } from "react-dom";
+import questioningIcon from "../../assets/questioning_icon.png";
 
 export default function ConfirmInterestedDialog({ isOpen, onClose, onConfirm, date, time }) {
   if (!isOpen) return null;
@@ -42,7 +43,9 @@ export default function ConfirmInterestedDialog({ isOpen, onClose, onConfirm, da
         `}</style>
 
         {/* Icon */}
-        <div style={{ fontSize: 40, marginBottom: 12, lineHeight: 1 }}>🙋</div>
+        <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}>
+          <img src={questioningIcon} alt="" style={{ width: 53, height: 53, objectFit: "contain" }} />
+        </div>
 
         <div style={{ fontSize: 17, fontWeight: 800, color: "#111827", marginBottom: 8, letterSpacing: "-0.3px" }}>
           Can you make it?

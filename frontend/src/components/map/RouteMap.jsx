@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { APIProvider, Map, AdvancedMarker } from "@vis.gl/react-google-maps";
@@ -218,85 +219,89 @@ export default function RouteMap({
         )}
       </AnimatePresence>
 
-      {/* ── Fullscreen overlay ───────────────────────────────────────────── */}
-      <AnimatePresence>
-        {isFullscreen && config && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            style={{
-              position: "fixed",
-              top: 0, bottom: 0,
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: "100%",
-              maxWidth: 390,
-              zIndex: 1000,
-              backgroundColor: "#000",
-            }}
-            onPointerDown={(e) => e.stopPropagation()}
-          >
-            <MapCanvas
-              apiKey={config.apiKey}
-              fromCoords={fromCoords}
-              toCoords={toCoords}
-              mapId="yugo-route-map-full"
-            />
-
-            {/* Close button */}
-            <button
-              onClick={(e) => { e.stopPropagation(); setIsFullscreen(false); }}
+      {/* ── Fullscreen overlay (portalled to body so native events never ── */}
+      {/* ── reach OfferCard's Framer Motion listeners)               ── */}
+      {createPortal(
+        <AnimatePresence>
+          {isFullscreen && config && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
               style={{
-                position: "absolute", top: 16, right: 16, zIndex: 10,
-                width: 40, height: 40, borderRadius: 10,
-                backgroundColor: "white", border: "none", cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.3)",
+                position: "fixed",
+                top: 0, bottom: 0,
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: "100%",
+                maxWidth: 390,
+                zIndex: 1000,
+                backgroundColor: "#000",
               }}
+              onPointerDown={(e) => e.stopPropagation()}
             >
-              <X size={18} color="#374151" />
-            </button>
+              <MapCanvas
+                apiKey={config.apiKey}
+                fromCoords={fromCoords}
+                toCoords={toCoords}
+                mapId="yugo-route-map-full"
+              />
 
-            {/* Location summary card */}
-            <div style={{
-              position: "absolute", bottom: 32, left: 16, right: 16, zIndex: 10,
-              backgroundColor: "white", borderRadius: 16, padding: "14px 18px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
-              display: "flex", gap: 12, alignItems: "center",
-            }}>
-              {/* A pin */}
+              {/* Close button */}
+              <button
+                onClick={(e) => { e.stopPropagation(); setIsFullscreen(false); }}
+                style={{
+                  position: "absolute", top: 16, right: 16, zIndex: 10,
+                  width: 40, height: 40, borderRadius: 10,
+                  backgroundColor: "white", border: "none", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.3)",
+                }}
+              >
+                <X size={18} color="#374151" />
+              </button>
+
+              {/* Location summary card */}
               <div style={{
-                width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
-                backgroundColor: "#7966fc",
-                display: "flex", alignItems: "center", justifyContent: "center",
+                position: "absolute", bottom: 32, left: 16, right: 16, zIndex: 10,
+                backgroundColor: "white", borderRadius: 16, padding: "14px 18px",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+                display: "flex", gap: 12, alignItems: "center",
               }}>
-                <span style={{ color: "white", fontSize: 11, fontWeight: 800 }}>A</span>
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 11, color: "#8b859e", fontWeight: 500 }}>{fromLabel}</div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1625", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{fromLocation}</div>
-              </div>
+                {/* A pin */}
+                <div style={{
+                  width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
+                  backgroundColor: "#7966fc",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <span style={{ color: "white", fontSize: 11, fontWeight: 800 }}>A</span>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 11, color: "#8b859e", fontWeight: 500 }}>{fromLabel}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1625", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{fromLocation}</div>
+                </div>
 
-              <div style={{ width: 1, height: 32, backgroundColor: "#ece9f0", flexShrink: 0 }} />
+                <div style={{ width: 1, height: 32, backgroundColor: "#ece9f0", flexShrink: 0 }} />
 
-              {/* B pin */}
-              <div style={{
-                width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
-                backgroundColor: "#fa6bae",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <span style={{ color: "white", fontSize: 11, fontWeight: 800 }}>B</span>
+                {/* B pin */}
+                <div style={{
+                  width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
+                  backgroundColor: "#fa6bae",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <span style={{ color: "white", fontSize: 11, fontWeight: 800 }}>B</span>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 11, color: "#8b859e", fontWeight: 500 }}>{toLabel}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1625", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{toLocation}</div>
+                </div>
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 11, color: "#8b859e", fontWeight: 500 }}>{toLabel}</div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1625", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{toLocation}</div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 }
