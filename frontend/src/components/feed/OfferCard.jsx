@@ -50,8 +50,9 @@ export default function OfferCard({ post, author, index = 0, onDelete }) {
       const res = await messageService.createRoom(post.id, currentUser.id);
       setInterested(true);
       setShowDialog(false);
-      navigate(buildRoute.chat(res.data.id));
+      setTimeout(() => navigate(buildRoute.chat(res.data.id)), 600);
     } catch {
+      setInterested(true);
       setShowDialog(false);
     } finally {
       setJoining(false);
