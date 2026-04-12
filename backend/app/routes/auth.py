@@ -16,6 +16,7 @@ from app.models.driver import Driver, DriverCreate
 from app.models.passenger import Passenger, PassengerCreate
 from app.models.user import _config
 from app.services.email import send_verification_code
+from app.services.IdCheck import verify_id
 
 router = APIRouter()
 
@@ -215,6 +216,15 @@ async def verify_license(
     expiration_date: date = Form(...),
     current_user=Depends(get_current_user),
 ):
+    image_bytes = await file.read()
+    result = verify_id(image_bytes)
+
+    if not result["is_valid"]:
+        raise HTTPException(
+            status_code=400,
+            detail="License verification failed. Please upload a clear JPEG or PNG photo.",
+        )
+
     await users_collection().update_one(
         {"_id": current_user.id},
         {

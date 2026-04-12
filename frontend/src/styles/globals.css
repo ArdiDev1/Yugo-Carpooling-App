@@ -15,9 +15,26 @@
   --color-muted:         #8b859e;
   --color-danger:        #EF4444;
 
-  --radius-card: 12px;
+  --radius-card: 14px;
   --radius-pill: 999px;
-  --radius-input: 8px;
+  --radius-input: 10px;
+
+  /* Typography scale */
+  --text-xs:    11px;
+  --text-sm:    13px;
+  --text-base:  15px;
+  --text-lg:    17px;
+  --text-xl:    20px;
+  --text-2xl:   24px;
+
+  /* Spacing scale */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
 
   --font-sans: 'Nunito', system-ui, sans-serif;
 }
@@ -27,7 +44,9 @@ body {
   color: var(--color-text);
   background: var(--color-background);
   -webkit-font-smoothing: antialiased;
-  font-size: 16px;
+  font-size: var(--text-base);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
 }
 
 /* Dark mode overrides — applied via data-theme="dark" on <html> */
