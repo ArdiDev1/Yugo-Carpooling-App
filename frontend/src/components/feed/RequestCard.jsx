@@ -7,7 +7,6 @@ import RouteMap from "../map/RouteMap";
 import { LUGGAGE_OPTIONS } from "../../constants/categories";
 import ConfirmInterestedDialog from "../ui/ConfirmInterestedDialog";
 import { messageService } from "../../services/message.service";
-import { useAuthStore } from "../../store/auth.store";
 import { buildRoute } from "../../constants/routes";
 
 function Pill({ children, color = "var(--color-muted)", bg = "var(--color-border)" }) {
@@ -40,16 +39,16 @@ export default function RequestCard({ post, author, index = 0, onDelete }) {
   if (!post || !author) return null;
   const luggage = LUGGAGE_OPTIONS.find((o) => o.value === post.luggage);
 
-  const navigate    = useNavigate();
-  const currentUser = useAuthStore((s) => s.user);
+  const navigate = useNavigate();
   const [showDialog, setShowDialog] = useState(false);
   const [interested, setInterested]  = useState(false);
   const [joining,   setJoining]      = useState(false);
 
+  // Driver accepts — creates the group chat with the passenger (post author).
   const handleConfirmInterest = async () => {
     setJoining(true);
     try {
-      const res = await messageService.createRoom(post.id, currentUser.id);
+      const res = await messageService.createRoom(post.id, post.authorId ?? author.id);
       setInterested(true);
       setShowDialog(false);
       navigate(buildRoute.chat(res.data.id));
@@ -149,11 +148,12 @@ export default function RequestCard({ post, author, index = 0, onDelete }) {
             whiteSpace: "nowrap",
           }}
         >
-          {interested ? "✓ Interested" : joining ? "..." : "Interested"}
+          {interested ? "✓ Matched" : joining ? "..." : "I'm in"}
         </button>
       </div>
 
       <ConfirmInterestedDialog
+        variant="driver"
         isOpen={showDialog}
         onClose={() => setShowDialog(false)}
         onConfirm={handleConfirmInterest}

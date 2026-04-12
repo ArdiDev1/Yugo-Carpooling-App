@@ -1,8 +1,17 @@
 import { createPortal } from "react-dom";
 import questioningIcon from "../../assets/questioning_icon.png";
 
-export default function ConfirmInterestedDialog({ isOpen, onClose, onConfirm, date, time }) {
+// variant="passenger" → signal interest (default)
+// variant="driver"    → accept passenger & open group chat
+export default function ConfirmInterestedDialog({ isOpen, onClose, onConfirm, date, time, variant = "passenger" }) {
   if (!isOpen) return null;
+
+  const isDriver = variant === "driver";
+  const title    = isDriver ? "Accept this passenger?" : "Can you make it?";
+  const body     = isDriver
+    ? "This will create a group chat between you and the passenger. Gas details will be shared automatically."
+    : "Confirm that you're interested and available for this ride.";
+  const confirmLabel = isDriver ? "Open chat" : "I'm in!";
 
   return createPortal(
     <>
@@ -48,13 +57,13 @@ export default function ConfirmInterestedDialog({ isOpen, onClose, onConfirm, da
         </div>
 
         <div style={{ fontSize: 17, fontWeight: 800, color: "#111827", marginBottom: 8, letterSpacing: "-0.3px" }}>
-          Can you make it?
+          {title}
         </div>
 
         <div style={{ fontSize: 13, color: "#6B7280", marginBottom: 22, lineHeight: 1.6 }}>
           {date && <div style={{ fontWeight: 600, color: "#374151" }}>{date}</div>}
           {time && <div>{time}</div>}
-          <div style={{ marginTop: 6, fontSize: 12 }}>Confirm that you're interested and available for this ride.</div>
+          <div style={{ marginTop: 6, fontSize: 12 }}>{body}</div>
         </div>
 
         <div style={{ display: "flex", gap: 10 }}>
@@ -95,7 +104,7 @@ export default function ConfirmInterestedDialog({ isOpen, onClose, onConfirm, da
             onMouseEnter={(e) => e.currentTarget.style.opacity = "0.9"}
             onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
           >
-            I'm in!
+            {confirmLabel}
           </button>
         </div>
       </div>

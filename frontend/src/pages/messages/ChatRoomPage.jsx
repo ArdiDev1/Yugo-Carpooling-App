@@ -164,15 +164,17 @@ export default function ChatRoomPage() {
               </div>
             );
           }
-          const isOwn      = msg.senderId === user?.id;
-          const showAvatar = !isOwn && msg.senderId !== prevSender;
+          // Driver is always on the right, passenger always on the left —
+          // fixed regardless of which account is viewing the chat.
+          const isDriverMsg  = msg.senderId === room?.driver_id;
+          const showAvatar   = !isDriverMsg && msg.senderId !== prevSender;
           prevSender = msg.senderId;
           const senderName = room?.names?.[msg.senderId] ?? "";
           return (
             <ChatBubble
               key={msg.id}
               message={msg}
-              isOwnMessage={isOwn}
+              isOwnMessage={isDriverMsg}
               senderName={senderName}
               showAvatar={showAvatar}
             />
