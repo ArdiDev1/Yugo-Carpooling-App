@@ -31,7 +31,7 @@ def _make_token(user_id: str) -> str:
 async def register_passenger(payload: PassengerCreate):
     email = payload.email.lower()
 
-    if not email.endswith(".edu"):
+    if not email.endswith(".edu"):   # Only allow .edu email addresses
         raise HTTPException(status_code=400, detail="Must use a .edu school email")
 
     existing = await users_collection().find_one({"email": email})
@@ -105,7 +105,7 @@ async def register_driver(payload: DriverCreate):
     user_doc = {
         "_id": user_id,
         "role": "driver",
-        "username": f"Dr_{payload.name.split()[0]}",
+        "username": f"Driver_{payload.name.split()[0]}",
         "name": payload.name,
         "email": email,
         "password_hash": _hash_password(payload.password),

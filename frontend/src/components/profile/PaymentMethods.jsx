@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Pencil } from "lucide-react";
 import { PAYMENT_METHODS } from "../../constants/categories";
+import api from "../../services/api";
+import { useAuthStore } from "../../store/auth.store";
 
 function EditPaymentSheet({ selected, onClose, onSave }) {
   const [draft, setDraft] = useState(new Set(selected));
@@ -109,12 +111,26 @@ function EditPaymentSheet({ selected, onClose, onSave }) {
 export default function PaymentMethods({ methods = [], isOwnProfile = false }) {
   const [showEdit, setShowEdit]   = useState(false);
   const [selected, setSelected]   = useState(methods);
+  const [saving,   setSaving]     = useState(false);
+  const updateUser = useAuthStore((s) => s.updateUser);
 
   if (!selected.length && !isOwnProfile) return null;
 
-  const handleSave = (updated) => {
-    setSelected(updated);
-    setShowEdit(false);
+  const handleSave = async (updated) => {
+    setSaving(true);
+    try {
+      const res = await api.patch("/users/me/payment-methods", {
+        paymentMethods: updated,
+      });
+      const saved = res.data.paymentMethods ?? updated;
+      setSelected(saved);
+      updateUser({ paymentMethods: saved });
+      setShowEdit(false);
+    } catch (err) {
+      console.error("Failed to save payment methods", err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

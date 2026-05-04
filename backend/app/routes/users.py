@@ -64,6 +64,26 @@ async def update_me(updates: dict, current_user=Depends(get_current_user)):
     updated_doc = await users_collection().find_one({"_id": current_user.id})
     return _doc_to_user(updated_doc)
 
+# Update the authenticated user's payment methods for different payment options for drivers
+@router.patch(
+    "/me/payment-methods",
+    summary="Update my payment methods",
+    description="Replace the authenticated user's list of accepted payment methods.",
+    responses={401: {"description": "Missing or invalid token"}},
+)
+async def update_payment_methods(
+    payload: dict,
+    current_user=Depends(get_current_user),
+):
+    methods = payload.get("paymentMethods", [])
+    if not isinstance(methods, list) or not all(isinstance(m, str) for m in methods):
+        raise HTTPException(status_code=422, detail="paymentMethods must be a list of strings")
+
+    await users_collection().update_one(
+        {"_id": current_user.id},
+        {"$set": {"payment_methods": methods}},
+    )
+    return {"paymentMethods": methods}
 
 @router.delete(
     "/me",
@@ -131,6 +151,7 @@ async def unfollow_user(user_id: str, current_user=Depends(get_current_user)):
         422: {"description": "Rating out of range"},
     },
 )
+
 async def rate_user(user_id: str, body: dict, current_user=Depends(get_current_user)):
     rating = float(body.get("rating", 0))
     if not 1.0 <= rating <= 5.0:
