@@ -1,8 +1,8 @@
 const VARIANTS = {
-  open:      { bg: "#DCFCE7", color: "#16A34A", label: "OPEN" },
-  closed:    { bg: "var(--color-border)", color: "var(--color-muted)", label: "CLOSED" },
+  open:      { bg: "rgba(34,197,94,0.16)",  color: "#22c55e",                label: "OPEN"      },
+  closed:    { bg: "var(--color-border)",   color: "var(--color-muted)",     label: "CLOSED"    },
   driver:    { bg: "var(--color-primary-light)", color: "var(--color-primary)", label: "DRIVER" },
-  passenger: { bg: "#FFF7ED", color: "#EA580C", label: "PASSENGER" },
+  passenger: { bg: "rgba(249,115,22,0.18)", color: "#fb923c",                label: "PASSENGER" },
 };
 
 export default function Badge({ variant = "open", label }) {

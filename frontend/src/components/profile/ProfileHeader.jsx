@@ -17,7 +17,7 @@ export default function ProfileHeader({
   if (!user) return null;
 
   return (
-    <div style={{ backgroundColor: "#fff", marginBottom: 8 }}>
+    <div style={{ backgroundColor: "var(--color-surface)", marginBottom: 8 }}>
 
       {/* Banner */}
       <div style={{ height: 110, background: "linear-gradient(135deg, #6C47FF 0%, #a78bfa 100%)" }} />
@@ -30,7 +30,7 @@ export default function ProfileHeader({
           <div style={{
             borderRadius: "50%",
             padding:       4,
-            backgroundColor: "#fff",
+            backgroundColor: "var(--color-surface)",
             boxShadow:     "0 4px 20px rgba(0,0,0,0.12)",
             lineHeight:    0,
           }}>
@@ -39,7 +39,7 @@ export default function ProfileHeader({
         </div>
 
         {/* Name */}
-        <div style={{ fontSize: 20, fontWeight: 800, color: "#111827", letterSpacing: "-0.3px", marginBottom: 3 }}>
+        <div style={{ fontSize: 20, fontWeight: 800, color: "var(--color-text)", letterSpacing: "-0.3px", marginBottom: 3 }}>
           {user.name}
         </div>
 
@@ -67,7 +67,7 @@ export default function ProfileHeader({
         {/* Bio */}
         {user.bio && (
           <p style={{
-            fontSize: 13, color: "#374151", lineHeight: 1.6,
+            fontSize: 13, color: "var(--color-text)", lineHeight: 1.6,
             marginBottom: 12, maxWidth: 280, margin: "0 auto 12px",
           }}>
             {user.bio}
@@ -84,14 +84,14 @@ export default function ProfileHeader({
         {/* Followers / Following */}
         <div style={{ display: "flex", justifyContent: "center", gap: 28, marginBottom: 18 }}>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 16, fontWeight: 800, color: "#111827" }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: "var(--color-text)" }}>
               {user.followers?.length ?? 0}
             </div>
             <div style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500, marginTop: 1 }}>followers</div>
           </div>
           <div style={{ width: 1, backgroundColor: "#F3F4F6" }} />
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 16, fontWeight: 800, color: "#111827" }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: "var(--color-text)" }}>
               {user.following?.length ?? 0}
             </div>
             <div style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500, marginTop: 1 }}>following</div>

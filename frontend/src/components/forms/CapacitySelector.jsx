@@ -4,7 +4,7 @@ export default function CapacitySelector({ value = 1, onChange, min = 1, max = 3
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      {label && <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{label}</span>}
+      {label && <span style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text)" }}>{label}</span>}
       <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
         <button
           type="button"
@@ -28,7 +28,7 @@ export default function CapacitySelector({ value = 1, onChange, min = 1, max = 3
         >
           −
         </button>
-        <span style={{ fontSize: 24, fontWeight: 700, color: "#111827", minWidth: 32, textAlign: "center" }}>
+        <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-text)", minWidth: 32, textAlign: "center" }}>
           {value}
         </span>
         <button

@@ -22,10 +22,9 @@ export default function BottomBar() {
   const unread       = rooms.reduce((sum, r) => sum + (r.unreadCount ?? 0), 0);
 
   const isActive  = (path) => pathname.startsWith(path);
-  const showFab   = !pathname.startsWith(ROUTES.MESSAGES) &&
-                    !pathname.startsWith(ROUTES.CREATE) &&
-                    !pathname.startsWith(ROUTES.EDIT_PROFILE) &&
-                    !pathname.startsWith(ROUTES.SETTINGS);
+  // Allowlist: FAB only appears on the Home feed. Every other route
+  // (profile, messages, settings, create, etc.) hides it by default.
+  const showFab   = pathname === ROUTES.HOME || pathname.startsWith(ROUTES.HOME + "/");
 
   const barHeight = "calc(60px + env(safe-area-inset-bottom))";
 

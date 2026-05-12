@@ -62,8 +62,8 @@ export default function CreatePage() {
             gap:             16,
             padding:         "18px 20px",
             borderRadius:    12,
-            border:          "1.5px solid #E5E7EB",
-            backgroundColor: "#fff",
+            border:          "1.5px solid var(--color-border)",
+            backgroundColor: "var(--color-surface)",
             cursor:          "pointer",
             textAlign:       "left",
             width:           "100%",
@@ -71,10 +71,10 @@ export default function CreatePage() {
         >
           <img src={raiseHandIcon} alt="request" style={{ width: 36, height: 36, objectFit: "contain" }} />
           <div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "var(--color-text)" }}>
               Request a Ride
             </div>
-            <div style={{ fontSize: 13, color: "#6B7280" }}>
+            <div style={{ fontSize: 13, color: "var(--color-muted)" }}>
               Ask a driver to pick you up
             </div>
           </div>
@@ -92,8 +92,8 @@ export default function CreatePage() {
             gap:             16,
             padding:         "18px 20px",
             borderRadius:    12,
-            border:          `1.5px solid ${isDriver ? "#6C47FF" : "#E5E7EB"}`,
-            backgroundColor: isDriver ? "#EDE8FF" : "#F9FAFB",
+            border:          `1.5px solid ${isDriver ? "#6C47FF" : "var(--color-border)"}`,
+            backgroundColor: isDriver ? "#EDE8FF" : "var(--color-surface)",
             cursor:          isDriver ? "pointer" : "not-allowed",
             textAlign:       "left",
             opacity:         isDriver ? 1 : 0.5,
@@ -102,10 +102,10 @@ export default function CreatePage() {
         >
           <img src={acceptHandIcon} alt="offer" style={{ width: 36, height: 36, objectFit: "contain" }} />
           <div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: isDriver ? "#111827" : "#9CA3AF" }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: isDriver ? "#111827" : "var(--color-muted)" }}>
               Offer a Ride
             </div>
-            <div style={{ fontSize: 13, color: "#9CA3AF" }}>
+            <div style={{ fontSize: 13, color: "var(--color-muted)" }}>
               {isDriver ? "Post open seats in your car" : "Drivers only — create a driver account to offer rides"}
             </div>
           </div>

@@ -3,7 +3,7 @@ import { LUGGAGE_OPTIONS } from "../../constants/categories";
 export default function LuggageSelector({ value, onChange, label }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      {label && <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{label}</span>}
+      {label && <span style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text)" }}>{label}</span>}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         {LUGGAGE_OPTIONS.map((opt) => {
           const active = value === opt.value;
@@ -19,8 +19,8 @@ export default function LuggageSelector({ value, onChange, label }) {
                 padding:         "7px 12px",
                 borderRadius:    999,
                 border:          `1.5px solid ${active ? "#6C47FF" : "#E5E7EB"}`,
-                backgroundColor: active ? "#EDE8FF" : "#fff",
-                color:           active ? "#6C47FF" : "#6B7280",
+                backgroundColor: active ? "#EDE8FF" : "var(--color-border)",
+                color:           active ? "#6C47FF" : "var(--color-text)",
                 fontSize:        13,
                 fontWeight:      active ? 700 : 500,
                 cursor:          "pointer",

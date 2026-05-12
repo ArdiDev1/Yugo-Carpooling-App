@@ -68,7 +68,7 @@ export default function EditProfilePage() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "#F7F7F8" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%"}}>
       <PageHeader title="Edit Profile" showBack />
       <form onSubmit={handleSubmit(onSubmit)} style={{ flex: 1, overflowY: "auto", padding: "16px 16px 32px", display: "flex", flexDirection: "column", gap: 14 }}>
         <Input label="Full Name"  name="name"     register={register} />
@@ -77,11 +77,11 @@ export default function EditProfilePage() {
         <Input label="Location"   name="location" placeholder="City, State" register={register} />
 
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Bio</label>
+          <label style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text)" }}>Bio</label>
           <textarea
             {...register("bio")}
             rows={3}
-            style={{ border: "1px solid #E5E7EB", borderRadius: 8, padding: "10px 12px", fontSize: 15, color: "#111827", resize: "none", backgroundColor: "#fff", outline: "none", width: "100%", boxSizing: "border-box" }}
+            style={{ border: "1px solid #E5E7EB", borderRadius: 8, padding: "10px 12px", fontSize: 15, color: "var(--color-text)", resize: "none", backgroundColor: "var(--color-border)", outline: "none", width: "100%", boxSizing: "border-box" }}
           />
         </div>
 
@@ -89,7 +89,7 @@ export default function EditProfilePage() {
 
         {isDriver && (
           <>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#111827", marginTop: 8 }}>🚗 Vehicle</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "var(--color-text)", marginTop: 8 }}>🚗 Vehicle</div>
             <Input label="Make"  name="vehicleMake"  register={register} placeholder="Honda" />
             <Input label="Model" name="vehicleModel" register={register} placeholder="Civic" />
             <Input label="Year"  name="vehicleYear"  register={register} placeholder="2021" />

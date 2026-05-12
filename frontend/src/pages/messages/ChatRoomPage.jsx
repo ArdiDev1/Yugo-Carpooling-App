@@ -114,7 +114,7 @@ export default function ChatRoomPage() {
   let prevSender = null;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "#F7F7F8" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%"}}>
       <PageHeader
         title={otherName}
         showBack

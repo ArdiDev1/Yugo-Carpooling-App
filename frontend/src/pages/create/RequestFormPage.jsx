@@ -37,6 +37,7 @@ import { useForm } from "react-hook-form";
 import PageHeader from "../../components/layout/PageHeader";
 import Button from "../../components/ui/Button";
 import Toggle from "../../components/ui/Toggle";
+import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import LocationInput from "../../components/forms/LocationInput";
 import DatePickerField from "../../components/forms/DatePickerField";
 import TimePickerField from "../../components/forms/TimePickerField";
@@ -58,10 +59,20 @@ export default function RequestFormPage() {
   const [prefersWomen, setPrefersWomen] = useState(false);    // per-ride preference
   const [flexible,     setFlexible]     = useState(true);     // show window vs exact time
   const [loading,      setLoading]      = useState(false);    // disables button while submitting
+  const [confirmExit,  setConfirmExit]  = useState(false);    // discard-changes prompt
 
   // react-hook-form: register = attach field to form, handleSubmit = wrap onSubmit,
   // control = needed for Controller-based fields (date/time pickers)
-  const { register, handleSubmit, control, formState: { errors } } = useForm();
+  const { register, handleSubmit, control, formState: { errors, isDirty } } = useForm();
+
+  // Back-nav guard. RHF tracks plain text inputs; the controlled extras
+  // (luggage/prefersWomen/flexible) count as "dirty" only if they changed
+  // from their initial state. If nothing's been touched, exit silently.
+  const extrasDirty = luggage !== "none" || prefersWomen !== false || flexible !== true;
+  const handleBack  = () => {
+    if (isDirty || extrasDirty) setConfirmExit(true);
+    else                        navigate(-1);
+  };
 
   // ── Form submission ────────────────────────────────────────────────────────
   // Called only after react-hook-form validates all registered fields.
@@ -89,10 +100,10 @@ export default function RequestFormPage() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "#F7F7F8" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
 
       {/* Back arrow + "Request a Ride" title */}
-      <PageHeader title="Request a Ride" showBack />
+      <PageHeader title="Request a Ride" showBack onBack={handleBack} />
 
       {/* ── Scrollable form body ─────────────────────────────────────────── */}
       <form
@@ -109,15 +120,15 @@ export default function RequestFormPage() {
 
         {/* Caption — shown as the main text on the post card in the feed */}
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Caption</label>
+          <label style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text)" }}>Caption</label>
           <textarea
             {...register("content")}
             placeholder="Tell drivers what you need… (e.g. 'Need a ride to Stop & Shop this weekend!')"
             rows={3}
             style={{
               border: "1px solid #E5E7EB", borderRadius: 8, padding: "10px 12px",
-              fontSize: 15, color: "#111827", resize: "none",
-              backgroundColor: "#fff", outline: "none",
+              fontSize: 15, color: "var(--color-text)", resize: "none",
+              backgroundColor: "var(--color-border)", outline: "none",
               width: "100%", boxSizing: "border-box",
             }}
           />
@@ -143,12 +154,12 @@ export default function RequestFormPage() {
 
         {/* Purpose — helps drivers and passengers filter posts by trip type */}
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>What's this trip for?</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text)" }}>What's this trip for?</span>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {RIDE_PURPOSES.map((p) => (
               <label key={p.value} style={{ display: "flex", alignItems: "center", gap: 5, cursor: "pointer" }}>
                 <input type="radio" value={p.value} {...register("purpose")} />
-                <span style={{ fontSize: 13, color: "#374151" }}>{p.label}</span>
+                <span style={{ fontSize: 13, color: "var(--color-text)" }}>{p.label}</span>
               </label>
             ))}
           </div>
@@ -201,6 +212,17 @@ export default function RequestFormPage() {
         </Button>
 
       </form>
+
+      <ConfirmDialog
+        isOpen={confirmExit}
+        onClose={() => setConfirmExit(false)}
+        onConfirm={() => { setConfirmExit(false); navigate(-1); }}
+        title="Discard this request?"
+        body="You'll lose what you've filled in so far."
+        confirmLabel="Discard"
+        cancelLabel="Keep editing"
+        destructive
+      />
     </div>
   );
 }

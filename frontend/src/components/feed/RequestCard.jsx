@@ -5,6 +5,7 @@ import Avatar from "../ui/Avatar";
 import RouteMap from "../map/RouteMap";
 import { LUGGAGE_OPTIONS } from "../../constants/categories";
 import ConfirmInterestedDialog from "../ui/ConfirmInterestedDialog";
+import ConfirmDialog from "../ui/ConfirmDialog";
 import { messageService } from "../../services/message.service";
 import { buildRoute } from "../../constants/routes";
 
@@ -39,9 +40,10 @@ export default function RequestCard({ post, author, index = 0, onDelete }) {
   const luggage = LUGGAGE_OPTIONS.find((o) => o.value === post.luggage);
 
   const navigate = useNavigate();
-  const [showDialog, setShowDialog] = useState(false);
-  const [interested, setInterested]  = useState(false);
-  const [joining,   setJoining]      = useState(false);
+  const [showDialog, setShowDialog]   = useState(false);
+  const [interested, setInterested]   = useState(false);
+  const [joining,   setJoining]       = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   // Driver accepts — creates the group chat with the passenger (post author).
   const handleConfirmInterest = async () => {
@@ -126,8 +128,11 @@ export default function RequestCard({ post, author, index = 0, onDelete }) {
       {/* Tags + Interested button */}
       <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 8, marginTop: 4 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, flex: 1 }}>
-          {post.prefersWomen && <Pill bg="#FFF0F6" color="#DB2777">Women preferred</Pill>}
-          <Pill bg={post.flexible ? "#ECFDF5" : "#FEF9C3"} color={post.flexible ? "#065F46" : "#92400E"}>
+          {post.prefersWomen && <Pill bg="rgba(236,72,153,0.16)" color="#ec4899">Women preferred</Pill>}
+          <Pill
+            bg={post.flexible ? "rgba(34,197,94,0.16)" : "rgba(245,158,11,0.18)"}
+            color={post.flexible ? "#22c55e" : "#f59e0b"}
+          >
             {post.flexible ? "Flexible time" : "Exact time"}
           </Pill>
           {luggage && <Pill>{luggage.emoji} {luggage.label}</Pill>}
@@ -139,16 +144,25 @@ export default function RequestCard({ post, author, index = 0, onDelete }) {
           disabled={joining}
           style={{
             flexShrink: 0,
-            padding: "6px 14px",
+            padding: "7px 16px",
             borderRadius: 999,
-            border: interested ? "1.5px solid #16A34A" : "1.5px solid var(--color-border)",
-            backgroundColor: interested ? "#DCFCE7" : joining ? "#F3F4F6" : "transparent",
-            color: interested ? "#15803D" : joining ? "#9CA3AF" : "var(--color-muted)",
-            fontSize: 12,
+            border: interested ? "1.5px solid #16A34A" : "none",
+            backgroundColor: interested
+              ? "rgba(34,197,94,0.18)"
+              : joining
+                ? "var(--color-border)"
+                : "var(--color-primary)",
+            color: interested
+              ? "#22c55e"
+              : joining
+                ? "var(--color-muted)"
+                : "#fff",
+            fontSize: 13,
             fontWeight: 700,
             cursor: (interested || joining) ? "default" : "pointer",
             transition: "all 0.2s",
             whiteSpace: "nowrap",
+            boxShadow: interested || joining ? "none" : "0 2px 8px rgba(121,102,252,0.35)",
           }}
         >
           {interested ? "✓ Matched" : joining ? "..." : "I'm in"}
@@ -166,17 +180,28 @@ export default function RequestCard({ post, author, index = 0, onDelete }) {
 
       {onDelete && (
         <button
-          onClick={(e) => { e.stopPropagation(); onDelete(post.id); }}
+          onClick={(e) => { e.stopPropagation(); setConfirmDelete(true); }}
           style={{
             width: "100%", marginTop: 10, padding: "10px 0",
-            borderRadius: 10, border: "1.5px solid #FCA5A5",
-            backgroundColor: "#FEF2F2", color: "#DC2626",
+            borderRadius: 10, border: "1.5px solid rgba(239,68,68,0.5)",
+            backgroundColor: "rgba(239,68,68,0.12)", color: "#ef4444",
             fontSize: 13, fontWeight: 700, cursor: "pointer",
           }}
         >
           Cancel Request
         </button>
       )}
+
+      <ConfirmDialog
+        isOpen={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={() => { setConfirmDelete(false); onDelete?.(post.id); }}
+        title="Cancel this request?"
+        body="This will remove your ride request from the feed. You can always post a new one."
+        confirmLabel="Yes, cancel"
+        cancelLabel="Keep it"
+        destructive
+      />
     </motion.div>
   );
 }

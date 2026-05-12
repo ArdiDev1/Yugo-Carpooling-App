@@ -103,16 +103,17 @@ export default function FeedFilterBar({
               position:        "absolute",
               top:             "calc(100% + 6px)",
               right:           0,
-              backgroundColor: "#fff",
+              backgroundColor: "var(--color-surface)",
+              border:          "1px solid var(--color-border)",
               borderRadius:    14,
               padding:         "10px 4px",
-              boxShadow:       "0 8px 28px rgba(0,0,0,0.15)",
+              boxShadow:       "0 12px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.04)",
               minWidth:        190,
               zIndex:          50,
             }}
           >
             <div style={{
-              fontSize: 10, fontWeight: 700, color: "#9CA3AF",
+              fontSize: 10, fontWeight: 700, color: "var(--color-muted)",
               letterSpacing: "0.06em", textTransform: "uppercase",
               padding: "2px 14px 6px",
             }}>
@@ -132,7 +133,6 @@ export default function FeedFilterBar({
                     cursor:          "pointer",
                     borderRadius:    8,
                     margin:          "0 4px",
-                    backgroundColor: checked ? "#F5F3FF" : "transparent",
                     transition:      "background 0.12s",
                   }}
                 >
@@ -146,8 +146,8 @@ export default function FeedFilterBar({
                     width:           17,
                     height:          17,
                     borderRadius:    5,
-                    border:          checked ? "none" : "1.5px solid #D1D5DB",
-                    backgroundColor: checked ? "#7966fc" : "#fff",
+                    border:          checked ? "none" : "1.5px solid var(--color-border)",
+                    backgroundColor: checked ? "#7966fc" : "var(--color-background)",
                     flexShrink:      0,
                     display:         "flex",
                     alignItems:      "center",
@@ -162,8 +162,7 @@ export default function FeedFilterBar({
                   </div>
                   <span style={{
                     fontSize:   13,
-                    fontWeight: checked ? 600 : 400,
-                    color:      checked ? "#4B3FBF" : "#374151",
+                    fontWeight: checked ? 600 : 400
                   }}>
                     {label}
                   </span>
@@ -180,9 +179,9 @@ export default function FeedFilterBar({
                   margin:          "6px 4px 2px",
                   padding:         "7px 0",
                   borderRadius:    8,
-                  border:          "none",
-                  backgroundColor: "#F3F4F6",
-                  color:           "#6B7280",
+                  border:          "1px solid var(--color-border)",
+                  backgroundColor: "var(--color-background)",
+                  color:           "var(--color-muted)",
                   fontSize:        12,
                   fontWeight:      600,
                   cursor:          "pointer",

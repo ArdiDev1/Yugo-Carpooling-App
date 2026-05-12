@@ -1,21 +1,19 @@
 import { createPortal } from "react-dom";
-import questioningIcon from "../../assets/questioning_icon.png";
 
-// variant="passenger" → confirm interest in a driver's offer (default)
-// variant="driver"    → accept a passenger's request & open group chat
-export default function ConfirmInterestedDialog({ isOpen, onClose, onConfirm, date, time, variant = "passenger" }) {
+export default function ConfirmDialog({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  body,
+  confirmLabel  = "Confirm",
+  cancelLabel   = "Cancel",
+  destructive   = false,
+}) {
   if (!isOpen) return null;
-
-  const isDriver = variant === "driver";
-  const title    = isDriver ? "Accept this passenger?" : "Can you make it?";
-  const body     = isDriver
-    ? "This will create a group chat between you and the passenger. Gas details will be shared automatically."
-    : "Confirm that you're interested and available for this ride.";
-  const confirmLabel = isDriver ? "Open chat" : "I'm in!";
 
   return createPortal(
     <>
-      {/* Backdrop */}
       <div
         onClick={onClose}
         onPointerDown={(e) => e.stopPropagation()}
@@ -28,7 +26,6 @@ export default function ConfirmInterestedDialog({ isOpen, onClose, onConfirm, da
         }}
       />
 
-      {/* Dialog */}
       <div
         onPointerDown={(e) => e.stopPropagation()}
         style={{
@@ -39,7 +36,7 @@ export default function ConfirmInterestedDialog({ isOpen, onClose, onConfirm, da
           backgroundColor: "var(--color-surface)",
           border:          "1px solid var(--color-border)",
           borderRadius:    20,
-          padding:         "28px 24px 20px",
+          padding:         "26px 24px 20px",
           zIndex:          2001,
           width:           "min(320px, 88vw)",
           boxShadow:       "0 24px 64px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.04)",
@@ -52,20 +49,15 @@ export default function ConfirmInterestedDialog({ isOpen, onClose, onConfirm, da
           @keyframes popIn  { from { opacity: 0; transform: translate(-50%,-48%) scale(0.92); } to { opacity: 1; transform: translate(-50%,-50%) scale(1); } }
         `}</style>
 
-        {/* Icon */}
-        <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}>
-          <img src={questioningIcon} alt="" style={{ width: 53, height: 53, objectFit: "contain" }} />
-        </div>
-
         <div style={{ fontSize: 17, fontWeight: 800, color: "var(--color-text)", marginBottom: 8, letterSpacing: "-0.3px" }}>
           {title}
         </div>
 
-        <div style={{ fontSize: 13, color: "var(--color-muted)", marginBottom: 22, lineHeight: 1.6 }}>
-          {date && <div style={{ fontWeight: 600, color: "var(--color-text)" }}>{date}</div>}
-          {time && <div>{time}</div>}
-          <div style={{ marginTop: 6, fontSize: 12 }}>{body}</div>
-        </div>
+        {body && (
+          <div style={{ fontSize: 13, color: "var(--color-muted)", marginBottom: 22, lineHeight: 1.6 }}>
+            {body}
+          </div>
+        )}
 
         <div style={{ display: "flex", gap: 10 }}>
           <button
@@ -80,12 +72,9 @@ export default function ConfirmInterestedDialog({ isOpen, onClose, onConfirm, da
               fontSize:     14,
               fontWeight:   600,
               cursor:       "pointer",
-              transition:   "opacity 0.15s",
             }}
-            onMouseEnter={(e) => e.currentTarget.style.opacity = "0.85"}
-            onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
           >
-            Not now
+            {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
@@ -94,16 +83,17 @@ export default function ConfirmInterestedDialog({ isOpen, onClose, onConfirm, da
               padding:      "11px 0",
               borderRadius: 12,
               border:       "none",
-              background:   "linear-gradient(135deg, #fa6bae, #7966fc)",
+              background:   destructive
+                ? "linear-gradient(135deg, #ef4444, #dc2626)"
+                : "linear-gradient(135deg, #fa6bae, #7966fc)",
               color:        "#fff",
               fontSize:     14,
               fontWeight:   700,
               cursor:       "pointer",
-              boxShadow:    "0 4px 14px rgba(121,102,252,0.35)",
-              transition:   "opacity 0.15s",
+              boxShadow:    destructive
+                ? "0 4px 14px rgba(239,68,68,0.35)"
+                : "0 4px 14px rgba(121,102,252,0.35)",
             }}
-            onMouseEnter={(e) => e.currentTarget.style.opacity = "0.9"}
-            onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
           >
             {confirmLabel}
           </button>

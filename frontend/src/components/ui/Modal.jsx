@@ -56,7 +56,7 @@ export default function Modal({ isOpen, onClose, title, children, showHandle = t
           bottom:          0,
           left:            0,
           right:           0,
-          backgroundColor: "#fff",
+          backgroundColor: "var(--color-surface)",
           borderRadius:    "20px 20px 0 0",
           zIndex:          101,
           transform:       isOpen ? "translateY(0)" : "translateY(100%)",
@@ -78,8 +78,8 @@ export default function Modal({ isOpen, onClose, title, children, showHandle = t
               padding:       "12px 20px",
               fontSize:      17,
               fontWeight:    700,
-              borderBottom:  "1px solid #F3F4F6",
-              color:         "#111827",
+              borderBottom:  "1px solid var(--color-border)",
+              color:         "var(--color-text)",
             }}
           >
             {title}

@@ -37,7 +37,7 @@ function EditPaymentSheet({ selected, onClose, onSave }) {
           left:            "50%",
           transform:       "translateX(-50%)",
           width:           "min(390px, 100vw)",
-          backgroundColor: "#fff",
+          backgroundColor: "var(--color-surface)",
           borderRadius:    "20px 20px 0 0",
           zIndex:          1001,
           padding:         "20px 20px 36px",
@@ -52,10 +52,10 @@ function EditPaymentSheet({ selected, onClose, onSave }) {
 
         {/* Handle */}
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
-          <div style={{ width: 36, height: 4, borderRadius: 999, backgroundColor: "#D1D5DB" }} />
+          <div style={{ width: 36, height: 4, borderRadius: 999, backgroundColor: "var(--color-border)" }} />
         </div>
 
-        <div style={{ fontSize: 16, fontWeight: 700, color: "#111827", marginBottom: 16 }}>
+        <div style={{ fontSize: 16, fontWeight: 700, color: "var(--color-text)", marginBottom: 16 }}>
         Payment Methods
         </div>
 
@@ -70,9 +70,9 @@ function EditPaymentSheet({ selected, onClose, onSave }) {
                 style={{
                   padding:         "9px 18px",
                   borderRadius:    999,
-                  border:          `2px solid ${active ? "#6C47FF" : "#E5E7EB"}`,
-                  backgroundColor: active ? "#EDE8FF" : "#F9FAFB",
-                  color:           active ? "#6C47FF" : "#6B7280",
+                  border:          `2px solid ${active ? "#6C47FF" : "var(--color-border)"}`,
+                  backgroundColor: active ? "#EDE8FF" : "var(--color-background)",
+                  color:           active ? "#6C47FF" : "var(--color-muted)",
                   fontSize:        14,
                   fontWeight:      active ? 700 : 500,
                   cursor:          "pointer",
@@ -135,9 +135,9 @@ export default function PaymentMethods({ methods = [], isOwnProfile = false }) {
 
   return (
     <>
-      <div style={{ backgroundColor: "#fff", borderRadius: 12, padding: 16, marginBottom: 8, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+      <div style={{ backgroundColor: "var(--color-surface)", borderRadius: 12, padding: 16, marginBottom: 8, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>💳 Payment</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: "var(--color-text)" }}>💳 Payment</div>
           {isOwnProfile && (
             <button
               onClick={() => setShowEdit(true)}

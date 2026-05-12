@@ -25,7 +25,7 @@ export default function Avatar({ src, name = "", size = "md", showBadge = false 
         <img
           src={src}
           alt={name}
-          style={{ width: dim, height: dim, borderRadius: "50%", objectFit: "cover" }}
+          style={{ width: dim, height: dim, borderRadius: "50%", objectFit: "cover"}}
         />
       ) : (
         <div
@@ -34,7 +34,7 @@ export default function Avatar({ src, name = "", size = "md", showBadge = false 
             height:          dim,
             borderRadius:    "50%",
             backgroundColor: getBgColor(name),
-            color:           "#fff",
+            color:           "var(--color-text)",
             display:         "flex",
             alignItems:      "center",
             justifyContent:  "center",

@@ -56,15 +56,21 @@ body {
 
 /* Dark mode overrides — applied via data-theme="dark" on <html> */
 [data-theme="dark"] {
+  color-scheme: dark;
+
   --color-primary:       #9b8fff;
-  --color-primary-light: #1a2f82;
+  --color-primary-light: #3d4280;
   --color-primary-dark:  #7966fc;
   --color-secondary:     #f891c3;
-  --color-surface:       #0d1b68;
-  --color-background:    #07104e;
-  --color-border:        #1b2f8a;
-  --color-text:          #f8f7f2;
-  --color-muted:         #7b85c4;
+
+  --color-background:    #313665;
+  --color-surface:       #111748;
+  --color-border:        #40477e;
+
+  --color-text:          #e8eaf6;
+  --color-muted:         #9aa0c9;
+
   --color-open:          #4ade80;
-  --color-closed:        #4b5a8a;
+  --color-closed:        #6b7280;
+  --color-danger:        #f87171;
 }

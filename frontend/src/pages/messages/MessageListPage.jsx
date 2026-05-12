@@ -34,7 +34,7 @@ export default function MessageListPage() {
   }, []);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "#F7F7F8" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%"}}>
       <PageHeader title="Messages" showBack={false} />
 
       {loading ? (

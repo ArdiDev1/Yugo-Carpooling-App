@@ -97,7 +97,7 @@ export default function UserProfilePage() {
 
   if (isLoading) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "#F7F7F8" }}>
+      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <div style={{ position: "relative", height: 80, background: "linear-gradient(135deg, #6C47FF 0%, #a78bfa 100%)" }}>
           <BackButton onClick={() => navigate(-1)} />
         </div>
@@ -122,7 +122,7 @@ export default function UserProfilePage() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "#F7F7F8" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "var(--color-border)" }}>
       <div style={{ flex: 1, overflowY: "auto" }}>
 
         {/* ProfileHeader wrapped in relative so BackButton sits on the banner */}
@@ -147,7 +147,7 @@ export default function UserProfilePage() {
 
         {posts.length > 0 && (
           <div style={{ padding: "12px 12px 0" }}>
-            <h3 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: "0 0 8px 4px" }}>Posts</h3>
+            <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--color-text)", margin: "0 0 8px 4px" }}>Posts</h3>
             {posts.map((post) =>
               post.type === "request"
                 ? <RequestCard key={post.id} post={post} author={profile} />

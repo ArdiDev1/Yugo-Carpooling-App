@@ -39,6 +39,7 @@ import { useForm } from "react-hook-form";
 import PageHeader from "../../components/layout/PageHeader";
 import Button from "../../components/ui/Button";
 import Toggle from "../../components/ui/Toggle";
+import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import LocationInput from "../../components/forms/LocationInput";
 import DatePickerField from "../../components/forms/DatePickerField";
 import TimePickerField from "../../components/forms/TimePickerField";
@@ -69,8 +70,17 @@ export default function OfferFormPage() {
   const [flexible,     setFlexible]     = useState(true);   // window vs exact time
   const [noPayment,    setNoPayment]    = useState(false);  // waive gas money
   const [loading,      setLoading]      = useState(false);  // submitting state
+  const [confirmExit,  setConfirmExit]  = useState(false);  // discard-changes prompt
 
-  const { register, handleSubmit, control, formState: { errors } } = useForm();
+  const { register, handleSubmit, control, formState: { errors, isDirty } } = useForm();
+
+  // Back-nav guard. Mirrors RequestFormPage: prompt only if anything has
+  // actually changed from the initial defaults.
+  const extrasDirty = seats !== 1 || storage !== "half" || prefersWomen !== false || flexible !== true || noPayment !== false;
+  const handleBack  = () => {
+    if (isDirty || extrasDirty) setConfirmExit(true);
+    else                        navigate(-1);
+  };
 
   // ── Form submission ────────────────────────────────────────────────────────
   const onSubmit = async (data) => {
@@ -99,10 +109,10 @@ export default function OfferFormPage() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "#F7F7F8" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%"}}>
 
       {/* Back arrow + "Offer a Ride" title */}
-      <PageHeader title="Offer a Ride" showBack />
+      <PageHeader title="Offer a Ride" showBack onBack={handleBack} />
 
       {/* ── Scrollable form body ─────────────────────────────────────────── */}
       <form
@@ -119,15 +129,15 @@ export default function OfferFormPage() {
 
         {/* Caption — main text shown on the offer post card in the feed */}
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Caption</label>
+          <label style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text)" }}>Caption</label>
           <textarea
             {...register("content")}
             placeholder="Tell passengers where you're going… (e.g. 'Driving to ALDI Saturday, 2 seats open!')"
             rows={3}
             style={{
               border: "1px solid #E5E7EB", borderRadius: 8, padding: "10px 12px",
-              fontSize: 15, color: "#111827", resize: "none",
-              backgroundColor: "#fff", outline: "none",
+              fontSize: 15, color: "var(--color-text)", resize: "none",
+              backgroundColor: "var(--color-surface)", outline: "none",
               width: "100%", boxSizing: "border-box",
             }}
           />
@@ -153,12 +163,12 @@ export default function OfferFormPage() {
 
         {/* Purpose — helps passengers find relevant trips */}
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>What's this trip for?</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text)" }}>What's this trip for?</span>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {RIDE_PURPOSES.map((p) => (
               <label key={p.value} style={{ display: "flex", alignItems: "center", gap: 5, cursor: "pointer" }}>
                 <input type="radio" value={p.value} {...register("purpose")} />
-                <span style={{ fontSize: 13, color: "#374151" }}>{p.label}</span>
+                <span style={{ fontSize: 13, color: "var(--color-text)" }}>{p.label}</span>
               </label>
             ))}
           </div>
@@ -201,7 +211,7 @@ export default function OfferFormPage() {
 
         {/* Storage — how much trunk/cargo space is available for luggage */}
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Storage / Trunk Space</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text)" }}>Storage / Trunk Space</span>
           <div style={{ display: "flex", gap: 8 }}>
             {STORAGE_OPTIONS.map((opt) => (
               <button
@@ -212,9 +222,9 @@ export default function OfferFormPage() {
                   flex:            1,
                   padding:         "8px 0",
                   borderRadius:    8,
-                  border:          `1.5px solid ${storage === opt.value ? "#6C47FF" : "#E5E7EB"}`,
-                  backgroundColor: storage === opt.value ? "#EDE8FF" : "#fff",
-                  color:           storage === opt.value ? "#6C47FF" : "#6B7280",
+                  border:          `1.5px solid ${storage === opt.value ? "#6C47FF" : "var(--color-border)"}`,
+                  backgroundColor: storage === opt.value ? "#EDE8FF" : "var(--color-border)",
+                  color:           storage === opt.value ? "#6C47FF" : "var(--color-muted)",
                   fontSize:        13,
                   fontWeight:      storage === opt.value ? 700 : 500,
                   cursor:          "pointer",
@@ -247,6 +257,17 @@ export default function OfferFormPage() {
         </Button>
 
       </form>
+
+      <ConfirmDialog
+        isOpen={confirmExit}
+        onClose={() => setConfirmExit(false)}
+        onConfirm={() => { setConfirmExit(false); navigate(-1); }}
+        title="Discard this offer?"
+        body="You'll lose what you've filled in so far."
+        confirmLabel="Discard"
+        cancelLabel="Keep editing"
+        destructive
+      />
     </div>
   );
 }

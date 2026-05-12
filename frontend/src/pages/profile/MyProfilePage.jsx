@@ -35,7 +35,7 @@ export default function MyProfilePage() {
   if (!user) return null;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "#F7F7F8" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <PageHeader
         title="My Profile"
         showBack={false}
@@ -60,7 +60,7 @@ export default function MyProfilePage() {
 
         {myPosts.length > 0 && (
           <div style={{ padding: "12px 12px 0" }}>
-            <h3 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: "0 0 8px 4px" }}>My Posts</h3>
+            <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--color-surface)", margin: "0 0 8px 4px" }}>My Posts</h3>
             {myPosts.map((post) =>
               post.type === "request"
                 ? <RequestCard key={post.id} post={post} author={user} onDelete={handleDelete} />

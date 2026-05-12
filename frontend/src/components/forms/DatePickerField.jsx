@@ -5,7 +5,7 @@ export default function DatePickerField({ name, label, control, error, minDate }
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
       {label && (
-        <label style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{label}</label>
+        <label style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text)" }}>{label}</label>
       )}
       <Controller
         name={name}
@@ -20,8 +20,8 @@ export default function DatePickerField({ name, label, control, error, minDate }
               borderRadius:    8,
               padding:         "10px 12px",
               fontSize:        15,
-              color:           "#111827",
-              backgroundColor: "#fff",
+              color:           "var(--color-text)",
+              backgroundColor: "var(--color-surface)",
               width:           "100%",
               outline:         "none",
             }}
