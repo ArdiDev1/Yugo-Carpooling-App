@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
 from app.auth.deps import get_current_user
+from app.auth.tokens import create_access_token
 from app.db.mongo import (
     users_collection,
     verification_codes_collection,
@@ -47,10 +48,6 @@ def _hash_password(password: str) -> str:
 
 def _verify_password(password: str, password_hash: str) -> bool:
     return bcrypt.checkpw(password.encode(), password_hash.encode())
-
-
-def _make_token(user_id: str) -> str:
-    return f"mock-token-{user_id}"
 
 
 def _doc_to_user(doc: dict) -> Union[Passenger, Driver]:
@@ -141,7 +138,7 @@ async def signup(body: SignupBody):
         except Exception as exc:
             raise HTTPException(status_code=502, detail=f"Failed to send email: {exc}")
 
-    return {"user": _doc_to_user(user_doc), "token": _make_token(user_id)}
+    return {"user": _doc_to_user(user_doc), "token": create_access_token(user_id, body.role)}
 
 
 @router.post(
@@ -158,7 +155,7 @@ async def login(body: LoginRequest):
         doc = await users_collection().find_one({"email": email, "role": body.role})
         if not doc or not _verify_password(body.password, doc.get("password_hash", "")):
             raise HTTPException(status_code=401, detail="Invalid credentials")
-        return {"user": _doc_to_user(doc), "token": _make_token(doc["_id"])}
+        return {"user": _doc_to_user(doc), "token": create_access_token(doc["_id"], doc["role"])}
 
     # No role specified — find all accounts with this email
     docs = await users_collection().find({"email": email}).to_list(2)
@@ -178,10 +175,10 @@ async def login(body: LoginRequest):
     # If user has both roles, return both so the frontend can let them pick
     if len(docs) > 1 and all(_verify_password(body.password, d.get("password_hash", "")) for d in docs):
         accounts = [_doc_to_user(d) for d in docs]
-        tokens = {d["role"]: _make_token(d["_id"]) for d in docs}
+        tokens = {d["role"]: create_access_token(d["_id"], d["role"]) for d in docs}
         return {"accounts": [{"user": a, "token": tokens[a.role]} for a in accounts]}
 
-    return {"user": _doc_to_user(valid_doc), "token": _make_token(valid_doc["_id"])}
+    return {"user": _doc_to_user(valid_doc), "token": create_access_token(valid_doc["_id"], valid_doc["role"])}
 
 
 @router.get(

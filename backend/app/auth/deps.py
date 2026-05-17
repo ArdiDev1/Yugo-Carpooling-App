@@ -4,6 +4,7 @@ from typing import Union
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from app.auth.tokens import decode_access_token
 from app.db.mongo import users_collection
 from app.models.driver import Driver
 from app.models.passenger import Passenger
@@ -27,10 +28,10 @@ def _doc_to_user(doc: dict) -> Union[Passenger, Driver]:
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(_bearer),
 ) -> Union[Passenger, Driver]:
-    token = credentials.credentials
-    if not token.startswith("mock-token-"):
+    claims = decode_access_token(credentials.credentials)
+    user_id = claims.get("sub")
+    if not user_id:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    user_id = token.removeprefix("mock-token-")
     doc = await users_collection().find_one({"_id": user_id})
     if not doc:
         raise HTTPException(status_code=401, detail="Unauthorized")
