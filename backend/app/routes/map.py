@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 
 from app.services.map import geocode_address, get_map_config
 from app.auth.deps import get_current_user
+from app.limiter import limiter
 
 router = APIRouter()
 
@@ -37,7 +38,12 @@ async def map_config(
         404: {"description": "Address could not be geocoded"},
     },
 )
-async def geocode(body: GeocodeBody, current_user=Depends(get_current_user)):
+@limiter.limit("30/minute")
+async def geocode(
+    request: Request,
+    body: GeocodeBody,
+    current_user=Depends(get_current_user),
+):
     coords = await geocode_address(body.address)
     if not coords:
         raise HTTPException(status_code=404, detail="Address could not be geocoded")

@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic.alias_generators import to_camel
 from typing import Annotated, Literal, Optional, Union
 from datetime import date, datetime
 from app.models.user import _config
@@ -75,3 +76,28 @@ class RideRequestCreate(BaseModel):
 
 
 PostCreate = Annotated[Union[RideOfferCreate, RideRequestCreate], Field(discriminator="type")]
+
+
+class PostUpdate(BaseModel):
+    """
+    Allowlist of fields the post's author may update via PATCH /posts/{post_id}.
+
+    Identity fields (author_id, type, school), engagement counters (likes,
+    comments, liked_by, interested_by), and pricing (gas_cost) are not
+    user-editable.
+    """
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        serialize_by_alias=True,
+        extra="forbid",
+    )
+
+    status: Optional[Literal["open", "closed"]] = None
+    content: Optional[str] = None
+    from_location: Optional[str] = None
+    to_location: Optional[str] = None
+    date: Optional[date] = None
+    time: Optional[str] = None
+    flexible: Optional[bool] = None
+    prefers_women: Optional[bool] = None

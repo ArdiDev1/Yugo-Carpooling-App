@@ -11,6 +11,9 @@ from typing import AsyncIterator
 # A stable, test-only JWT secret. Must be set before importing app modules
 # so token issuance works without depending on the real .env.
 os.environ.setdefault("JWT_SECRET", "test-secret-do-not-use-in-prod")
+# Disable rate limiting for the regression suite. The dedicated rate-limit
+# test re-enables it locally.
+os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient

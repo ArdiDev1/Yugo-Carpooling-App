@@ -7,3 +7,4 @@ httpx
 motor
 bcrypt
 python-jose[cryptography]
+slowapi

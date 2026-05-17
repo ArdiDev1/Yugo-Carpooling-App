@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from datetime import datetime, timezone
 import uuid
 
-from app.models.ride import RideOffer, RideRequest, PostCreate
+from app.models.ride import RideOffer, RideRequest, PostCreate, PostUpdate
 from app.auth.deps import get_current_user
 from app.db.mongo import rides_collection, users_collection
+from app.limiter import limiter
 from app.services.GeminiMatching import rank_feed
 from app.services.GasCost import estimate_ride_cost
 
@@ -84,7 +85,8 @@ async def _enrich_with_authors(posts, current_user_id: str = None):
                 "Otherwise, a random selection is shown.",
     responses={401: {"description": "Missing or invalid token"}},
 )
-async def get_feed(current_user=Depends(get_current_user)):
+@limiter.limit("20/minute")
+async def get_feed(request: Request, current_user=Depends(get_current_user)):
     opposite = "offer" if current_user.role == "passenger" else "request"
 
     docs = await rides_collection().find(
@@ -229,17 +231,20 @@ async def create_post(body: PostCreate, current_user=Depends(get_current_user)):
         404: {"description": "Post not found"},
     },
 )
-async def update_post(post_id: str, updates: dict, current_user=Depends(get_current_user)):
+async def update_post(post_id: str, updates: PostUpdate, current_user=Depends(get_current_user)):
     doc = await rides_collection().find_one({"_id": post_id})
     if not doc:
         raise HTTPException(status_code=404, detail="Post not found")
     if doc["author_id"] != current_user.id:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    allowed = {"status", "content", "from_location", "to_location", "date", "time", "flexible", "prefers_women"}
-    clean = {k: v for k, v in updates.items() if k in allowed}
+    payload = updates.model_dump(exclude_unset=True, by_alias=False)
+    # BSON cannot encode datetime.date — store as ISO string
+    if "date" in payload and hasattr(payload["date"], "isoformat"):
+        payload["date"] = payload["date"].isoformat()
 
-    await rides_collection().update_one({"_id": post_id}, {"$set": clean})
+    if payload:
+        await rides_collection().update_one({"_id": post_id}, {"$set": payload})
     updated = await rides_collection().find_one({"_id": post_id})
     enriched = await _enrich_with_authors([_ride_from_doc(updated)], current_user.id)
     return enriched[0]

@@ -6,6 +6,7 @@ from app.auth.deps import get_current_user
 from app.db.mongo import users_collection
 from app.models.driver import Driver
 from app.models.passenger import Passenger
+from app.models.user import UserUpdate
 
 router = APIRouter()
 
@@ -21,19 +22,6 @@ def _doc_to_user(doc: dict) -> Union[Passenger, Driver]:
             data["license_expiration"] = date.fromisoformat(exp)
         return Driver(**data)
     return Passenger(**data)
-
-
-def _normalize_updates(updates: dict) -> dict:
-    """Convert camelCase update keys to snake_case for MongoDB storage."""
-    from pydantic.alias_generators import to_snake
-    result = {}
-    for k, v in updates.items():
-        snake_key = to_snake(k)
-        if isinstance(v, dict):
-            result[snake_key] = {to_snake(vk): vv for vk, vv in v.items()}
-        else:
-            result[snake_key] = v
-    return result
 
 
 @router.get(
@@ -55,12 +43,13 @@ async def get_user(user_id: str):
     description="Partially update the authenticated user's profile fields (name, bio, avatar, vehicle, etc.).",
     responses={401: {"description": "Missing or invalid token"}},
 )
-async def update_me(updates: dict, current_user=Depends(get_current_user)):
-    normalized = _normalize_updates(updates)
-    await users_collection().update_one(
-        {"_id": current_user.id},
-        {"$set": normalized},
-    )
+async def update_me(updates: UserUpdate, current_user=Depends(get_current_user)):
+    payload = updates.model_dump(exclude_unset=True, by_alias=False)
+    if payload:
+        await users_collection().update_one(
+            {"_id": current_user.id},
+            {"$set": payload},
+        )
     updated_doc = await users_collection().find_one({"_id": current_user.id})
     return _doc_to_user(updated_doc)
 

@@ -4,11 +4,12 @@ from datetime import datetime, date, timedelta, timezone
 from typing import Annotated, Optional, Union
 
 import bcrypt
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 
 from app.auth.deps import get_current_user
 from app.auth.tokens import create_access_token
+from app.limiter import limiter
 from app.db.mongo import (
     users_collection,
     verification_codes_collection,
@@ -70,7 +71,8 @@ def _doc_to_user(doc: dict) -> Union[Passenger, Driver]:
     status_code=201,
     responses={409: {"description": "Email already registered"}},
 )
-async def signup(body: SignupBody):
+@limiter.limit("5/minute")
+async def signup(request: Request, body: SignupBody):
     email = body.email.lower()
 
     existing = await users_collection().find_one({"email": email, "role": body.role})
@@ -147,7 +149,8 @@ async def signup(body: SignupBody):
     description="Authenticate with a school email and password. Returns the user object and a bearer token.",
     responses={401: {"description": "Invalid credentials"}},
 )
-async def login(body: LoginRequest):
+@limiter.limit("10/minute")
+async def login(request: Request, body: LoginRequest):
     email = body.email.lower()
 
     if body.role:
@@ -206,7 +209,9 @@ async def logout():
     description="Submit the 4-digit code sent to the user's school email address.",
     responses={400: {"description": "Invalid or expired code"}},
 )
+@limiter.limit("5/minute")
 async def verify_email(
+    request: Request,
     body: VerifyEmailRequest,
     current_user=Depends(get_current_user),
 ):

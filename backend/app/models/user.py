@@ -45,3 +45,28 @@ class UserCreate(BaseModel):
     prefers_women: bool = False
     school: Optional[str] = None
     school_id: Optional[str] = None
+
+
+class UserUpdate(BaseModel):
+    """
+    Allowlist of fields a user may self-update via PATCH /users/me.
+
+    Everything else (role, password_hash, email_verified, license_verified,
+    rating, followers, etc.) is rejected so a client cannot escalate privileges
+    or rewrite immutable identity fields.
+    """
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        serialize_by_alias=True,
+        extra="forbid",
+    )
+
+    name: Optional[str] = None
+    bio: Optional[str] = None
+    avatar_url: Optional[str] = None
+    phone: Optional[str] = None
+    pronouns: Optional[str] = None
+    location: Optional[str] = None
+    prefers_women: Optional[bool] = None
+    vehicle: Optional[dict] = None
